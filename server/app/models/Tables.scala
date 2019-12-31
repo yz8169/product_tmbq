@@ -1,5 +1,4 @@
 package models
-
 // AUTO-GENERATED Slick data model
 /** Stand-alone Slick data model for immediate use */
 object Tables extends {
@@ -32,10 +31,10 @@ trait Tables {
     AccountRow.tupled((<<[Int], <<[String], <<[String]))
   }
   /** Table description of table account. Objects of this class serve as prototypes for rows in queries. */
-  class Account(_tableTag: Tag) extends profile.api.Table[AccountRow](_tableTag, Some("tmbq"), "account") {
+  class Account(_tableTag: Tag) extends profile.api.Table[AccountRow](_tableTag, Some("product_tmbq"), "account") {
     def * = (id, account, password) <> (AccountRow.tupled, AccountRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
-    def ? = (Rep.Some(id), Rep.Some(account), Rep.Some(password)).shaped.<>({r=>import r._; _1.map(_=> AccountRow.tupled((_1.get, _2.get, _3.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+    def ? = ((Rep.Some(id), Rep.Some(account), Rep.Some(password))).shaped.<>({r=>import r._; _1.map(_=> AccountRow.tupled((_1.get, _2.get, _3.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
 
     /** Database column id SqlType(INT), PrimaryKey */
     val id: Rep[Int] = column[Int]("id", O.PrimaryKey)
@@ -64,10 +63,10 @@ trait Tables {
     AdjustMissionRow.tupled((<<[Int], <<[String], <<[String], <<[String], <<[String], <<[Int], <<[DateTime], <<?[DateTime], <<[String]))
   }
   /** Table description of table adjust_mission. Objects of this class serve as prototypes for rows in queries. */
-  class AdjustMission(_tableTag: Tag) extends profile.api.Table[AdjustMissionRow](_tableTag, Some("tmbq"), "adjust_mission") {
+  class AdjustMission(_tableTag: Tag) extends profile.api.Table[AdjustMissionRow](_tableTag, Some("product_tmbq"), "adjust_mission") {
     def * = (id, fromMission, compoundName, args, missionName, userId, startTime, endTime, state) <> (AdjustMissionRow.tupled, AdjustMissionRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
-    def ? = (Rep.Some(id), Rep.Some(fromMission), Rep.Some(compoundName), Rep.Some(args), Rep.Some(missionName), Rep.Some(userId), Rep.Some(startTime), endTime, Rep.Some(state)).shaped.<>({r=>import r._; _1.map(_=> AdjustMissionRow.tupled((_1.get, _2.get, _3.get, _4.get, _5.get, _6.get, _7.get, _8, _9.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+    def ? = ((Rep.Some(id), Rep.Some(fromMission), Rep.Some(compoundName), Rep.Some(args), Rep.Some(missionName), Rep.Some(userId), Rep.Some(startTime), endTime, Rep.Some(state))).shaped.<>({r=>import r._; _1.map(_=> AdjustMissionRow.tupled((_1.get, _2.get, _3.get, _4.get, _5.get, _6.get, _7.get, _8, _9.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
 
     /** Database column id SqlType(INT), AutoInc, PrimaryKey */
     val id: Rep[Int] = column[Int]("id", O.AutoInc, O.PrimaryKey)
@@ -105,10 +104,10 @@ trait Tables {
     MissionRow.tupled((<<[Int], <<[String], <<[Int], <<[DateTime], <<?[DateTime], <<[String]))
   }
   /** Table description of table mission. Objects of this class serve as prototypes for rows in queries. */
-  class Mission(_tableTag: Tag) extends profile.api.Table[MissionRow](_tableTag, Some("tmbq"), "mission") {
+  class Mission(_tableTag: Tag) extends profile.api.Table[MissionRow](_tableTag, Some("product_tmbq"), "mission") {
     def * = (id, missionName, userId, startTime, endTime, state) <> (MissionRow.tupled, MissionRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
-    def ? = (Rep.Some(id), Rep.Some(missionName), Rep.Some(userId), Rep.Some(startTime), endTime, Rep.Some(state)).shaped.<>({r=>import r._; _1.map(_=> MissionRow.tupled((_1.get, _2.get, _3.get, _4.get, _5, _6.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+    def ? = ((Rep.Some(id), Rep.Some(missionName), Rep.Some(userId), Rep.Some(startTime), endTime, Rep.Some(state))).shaped.<>({r=>import r._; _1.map(_=> MissionRow.tupled((_1.get, _2.get, _3.get, _4.get, _5, _6.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
 
     /** Database column id SqlType(INT), AutoInc, PrimaryKey */
     val id: Rep[Int] = column[Int]("id", O.AutoInc, O.PrimaryKey)
@@ -136,10 +135,10 @@ trait Tables {
     ModeRow.tupled((<<[Int], <<[String]))
   }
   /** Table description of table mode. Objects of this class serve as prototypes for rows in queries. */
-  class Mode(_tableTag: Tag) extends profile.api.Table[ModeRow](_tableTag, Some("tmbq"), "mode") {
+  class Mode(_tableTag: Tag) extends profile.api.Table[ModeRow](_tableTag, Some("product_tmbq"), "mode") {
     def * = (id, test) <> (ModeRow.tupled, ModeRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
-    def ? = (Rep.Some(id), Rep.Some(test)).shaped.<>({r=>import r._; _1.map(_=> ModeRow.tupled((_1.get, _2.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+    def ? = ((Rep.Some(id), Rep.Some(test))).shaped.<>({r=>import r._; _1.map(_=> ModeRow.tupled((_1.get, _2.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
 
     /** Database column id SqlType(INT), AutoInc, PrimaryKey */
     val id: Rep[Int] = column[Int]("id", O.AutoInc, O.PrimaryKey)
@@ -161,10 +160,10 @@ trait Tables {
     UserRow.tupled((<<[Int], <<[String], <<[String], <<[DateTime]))
   }
   /** Table description of table user. Objects of this class serve as prototypes for rows in queries. */
-  class User(_tableTag: Tag) extends profile.api.Table[UserRow](_tableTag, Some("tmbq"), "user") {
+  class User(_tableTag: Tag) extends profile.api.Table[UserRow](_tableTag, Some("product_tmbq"), "user") {
     def * = (id, name, password, createTime) <> (UserRow.tupled, UserRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
-    def ? = (Rep.Some(id), Rep.Some(name), Rep.Some(password), Rep.Some(createTime)).shaped.<>({r=>import r._; _1.map(_=> UserRow.tupled((_1.get, _2.get, _3.get, _4.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+    def ? = ((Rep.Some(id), Rep.Some(name), Rep.Some(password), Rep.Some(createTime))).shaped.<>({r=>import r._; _1.map(_=> UserRow.tupled((_1.get, _2.get, _3.get, _4.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
 
     /** Database column id SqlType(INT), AutoInc, PrimaryKey */
     val id: Rep[Int] = column[Int]("id", O.AutoInc, O.PrimaryKey)

@@ -5,9 +5,6 @@ import myJs.myPkg.LayerOptions
 import scala.scalajs.js
 import scalatags.Text.all._
 
-import scala.collection.mutable.ArrayBuffer
-
-
 /**
   * Created by yz on 2019/3/13
   */

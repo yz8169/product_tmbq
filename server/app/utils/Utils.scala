@@ -9,21 +9,14 @@ import org.apache.commons.lang3.StringUtils
 import org.apache.poi.ss.usermodel.{Cell, DateUtil}
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import org.joda.time.DateTime
-//import org.apache.commons.math3.stat.StatUtils
-//import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation
-//import org.saddle.io._
-//import CsvImplicits._
-//import javax.imageio.ImageIO
 import org.apache.commons.codec.binary.Base64
-//import org.apache.pdfbox.pdmodel.PDDocument
-//import org.apache.pdfbox.rendering.PDFRenderer
 import play.api.libs.json.Json
 
-import scala.collection.JavaConverters._
-import scala.collection.mutable
-import scala.collection.mutable.ArrayBuffer
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
+import scala.jdk.CollectionConverters._
+import implicits.Implicits._
+
 //import scala.math.log10
 
 object Utils {
@@ -74,54 +67,6 @@ object Utils {
     path.replace("\\", "/").replaceAll("D:", "/mnt/d").
       replaceAll("E:", "/mnt/e").replaceAll("C:", "/mnt/c")
   }
-
-
-  def getAllFiles(file: File): ArrayBuffer[File] = {
-    val files = ArrayBuffer[File]()
-
-    def loop(file: File): ArrayBuffer[File] = {
-      for (f <- file.listFiles()) {
-        if (f.isDirectory) {
-          loop(f)
-        } else {
-          files += f
-        }
-      }
-      files
-    }
-
-    loop(file)
-  }
-
-
-  val scriptHtml =
-    """
-      |<script>
-      |	$(function () {
-      |			    $("footer:first").remove()
-      |        $("#content").css("margin","0")
-      |       $(".linkheader>a").each(function () {
-      |				   var text=$(this).text()
-      |				   $(this).replaceWith("<span style='color: #222222;'>"+text+"</span>")
-      |			   })
-      |
-      |      $("tr").each(function () {
-      |         var a=$(this).find("td>a:last")
-      |					var text=a.text()
-      |					a.replaceWith("<span style='color: #222222;'>"+text+"</span>")
-      |				})
-      |
-      |       $("p.titleinfo>a").each(function () {
-      |				   var text=$(this).text()
-      |				   $(this).replaceWith("<span style='color: #606060;'>"+text+"</span>")
-      |			   })
-      |
-      |       $(".param:eq(1)").parent().hide()
-      |       $(".linkheader").hide()
-      |
-      |			})
-      |</script>
-    """.stripMargin
 
   val Rscript = {
     "Rscript"
@@ -286,88 +231,6 @@ object Utils {
     }
   }
 
-  def xlsx2Txt(xlsxFile: File, txtFile: File) = {
-    val lines = xlsx2Lines(xlsxFile)
-    FileUtils.writeLines(txtFile, lines.asJava)
-  }
-
-  def removeXlsxBlankLine(file: File) = {
-    val lines = Utils.xlsx2Lines(file)
-    Utils.lines2Xlsx(lines, file)
-  }
-
-  def xlsx2Lines(xlsxFile: File) = {
-    val is = new FileInputStream(xlsxFile.getAbsolutePath)
-    val xssfWorkbook = new XSSFWorkbook(is)
-    val xssfSheet = xssfWorkbook.getSheetAt(0)
-    val lines = ArrayBuffer[String]()
-    for (i <- 0 to xssfSheet.getLastRowNum) {
-      val xssfRow = xssfSheet.getRow(i)
-      val columns = ArrayBuffer[String]()
-      val firstRow = xssfSheet.getRow(0)
-      for (j <- 0 until firstRow.getLastCellNum) {
-        val cell = xssfRow.getCell(j)
-        var value = ""
-        if (cell != null) {
-          cell.getCellType match {
-            case Cell.CELL_TYPE_STRING =>
-              value = cell.getStringCellValue
-            case Cell.CELL_TYPE_NUMERIC =>
-              if (DateUtil.isCellDateFormatted(cell)) {
-                val dateFormat = new SimpleDateFormat("yyyy/MM/dd")
-                value = dateFormat.format(cell.getDateCellValue)
-              } else {
-                val doubleValue = cell.getNumericCellValue
-                value = if (doubleValue == doubleValue.toInt) {
-                  doubleValue.toInt.toString
-                } else doubleValue.toString
-              }
-            case Cell.CELL_TYPE_BLANK =>
-              value = ""
-            case _ =>
-              value = ""
-          }
-        }
-
-        columns += value.trim
-      }
-      val line = columns.mkString("\t")
-      lines += line
-    }
-    xssfWorkbook.close()
-    lines.filter(StringUtils.isNotBlank(_))
-  }
-
-  def txt2Xlsx(txtFile: File, xlsxFile: File) = {
-    val lines = FileUtils.readLines(txtFile).asScala
-    lines2Xlsx(lines, xlsxFile)
-  }
-
-  def lines2Xlsx(lines: mutable.Buffer[String], xlsxFile: File) = {
-    val outputWorkbook = new XSSFWorkbook()
-    val outputSheet = outputWorkbook.createSheet("Sheet1")
-    for (i <- 0 until lines.size) {
-      val outputEachRow = outputSheet.createRow(i)
-      val line = lines(i)
-      val columns = line.split("\t")
-      for (j <- 0 until columns.size) {
-        var cell = outputEachRow.createCell(j)
-        if (Utils.isDouble(columns(j))) {
-          cell.setCellValue(columns(j).toDouble)
-        } else {
-          cell.setCellValue(columns(j))
-        }
-
-      }
-    }
-
-    val fileOutputStream = new FileOutputStream(xlsxFile)
-    outputWorkbook.write(fileOutputStream)
-    fileOutputStream.close()
-    outputWorkbook.close()
-  }
-
-
   def lfJoin(seq: Seq[String]) = {
     seq.mkString("\n")
   }
@@ -439,21 +302,6 @@ object Utils {
     geneId.split("\n").map(_.trim).distinct.toBuffer
   }
 
-  def getDataJson(file: File) = {
-    val lines = FileUtils.readLines(file).asScala
-    val sampleNames = lines.head.split("\t").drop(1)
-    val array = lines.drop(1).map { line =>
-      val columns = line.split("\t")
-      val map = mutable.Map[String, String]()
-      map += ("geneId" -> columns(0))
-      sampleNames.zip(columns.drop(1)).foreach { case (sampleName, data) =>
-        map += (sampleName -> data)
-      }
-      map
-    }
-    Json.obj("array" -> array, "sampleNames" -> sampleNames)
-  }
-
   def dealInputFile(file: File) = {
     val lines = FileUtils.readLines(file).asScala
     val buffer = lines.map(_.trim)
@@ -469,98 +317,20 @@ object Utils {
   }
 
 
-  //  def pdf2png(tmpDir: File, fileName: String) = {
-  //    val pdfFile = new File(tmpDir, fileName)
-  //    val outFileName = fileName.substring(0, fileName.lastIndexOf(".")) + ".png"
-  //    val outFile = new File(tmpDir, outFileName)
-  //    val document = PDDocument.load(pdfFile)
-  //    val renderer = new PDFRenderer(document)
-  //    ImageIO.write(renderer.renderImage(0, 3), "png", outFile)
-  //    document.close()
-  //  }
-  //
   def getInfoByFile(file: File) = {
-    val lines = FileUtils.readLines(file).asScala
-    val columnNames = lines.head.split("\t").drop(1)
+    val lines =file.lines
+    getInfoByLines(lines)
+  }
+
+  def getInfoByLines(lines: List[String]) = {
+    val columnNames = lines.head.split("\t")
     val array = lines.drop(1).map { line =>
-      val columns = line.split("\t")
-      val map = mutable.Map[String, String]()
-      map += ("geneId" -> columns(0))
-      columnNames.zip(columns.drop(1)).foreach { case (columnName, data) =>
-        map += (columnName -> data)
+      val columns = line.split("\t").map { x =>
+        x.replaceAll("^\"", "").replaceAll("\"$", "")
       }
-      map
+      columnNames.zip(columns).toMap
     }
     (columnNames, array)
-  }
-
-  def checkFile(file: File): (Boolean, String) = {
-    val buffer = FileUtils.readLines(file).asScala
-    val headers = buffer.head.split("\t")
-    var error = ""
-    if (headers.size < 2) {
-      error = "错误：文件列数小于2！"
-      return (false, error)
-    }
-    val headersNoHead = headers.drop(1)
-    val repeatElement = headersNoHead.diff(headersNoHead.distinct).distinct.headOption
-    repeatElement match {
-      case Some(x) => val nums = headers.zipWithIndex.filter(_._1 == x).map(_._2 + 1).mkString("(", "、", ")")
-        error = "错误：样品名" + x + "在第" + nums + "列重复出现！"
-        return (false, error)
-      case None =>
-    }
-
-    val ids = buffer.drop(1).map(_.split("\t")(0))
-    val repeatid = ids.diff(ids.distinct).distinct.headOption
-    repeatid match {
-      case Some(x) => val nums = ids.zipWithIndex.filter(_._1 == x).map(_._2 + 2).mkString("(", "、", ")")
-        error = "错误：第一列:" + x + "在第" + nums + "行重复出现！"
-        return (false, error)
-      case None =>
-    }
-
-    val headerSize = headers.size
-    for (i <- 1 until buffer.size) {
-      val columns = buffer(i).split("\t")
-      if (columns.size != headerSize) {
-        error = "错误：数据文件第" + (i + 1) + "行列数不对！"
-        return (false, error)
-      }
-
-    }
-
-    for (i <- 1 until buffer.size) {
-      val columns = buffer(i).split("\t")
-      for (j <- 1 until columns.size) {
-        val value = columns(j)
-        if (!isDouble(value)) {
-          error = "错误：数据文件第" + (i + 1) + "行第" + (j + 1) + "列不为数字！"
-          return (false, error)
-        }
-      }
-    }
-    (true, error)
-  }
-
-  def isDouble(value: String): Boolean = {
-    try {
-      value.toDouble
-    } catch {
-      case _: Exception =>
-        return false
-    }
-    true
-  }
-
-  def isInt(value: String): Boolean = {
-    try {
-      val double = value.toDouble
-      double == double.toInt
-    } catch {
-      case _: Exception =>
-        false
-    }
   }
 
   def getBase64Str(imageFile: File): String = {

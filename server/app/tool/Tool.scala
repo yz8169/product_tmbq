@@ -270,9 +270,10 @@ class Tool @Inject()(modeDao: ModeDao) {
     val format = outputWorkbook.createDataFormat()
     val lines = FileUtils.readLines(file).asScala
     val colorLines = FileUtils.readLines(colorFile).asScala.map(_.split("\t"))
-    val yellowStyle = getYellowStyle(outputWorkbook)
-    val redStyle = getRedStyle(outputWorkbook)
-    val greenStyle = getGreenStyle(outputWorkbook)
+    val xlsxStyle = new XlsxStyle(outputWorkbook)
+    val yellowStyle = xlsxStyle.yellowStyle
+    val redStyle = xlsxStyle.redStyle
+    val greenStyle = xlsxStyle.greenStyle
     for (i <- 0 until lines.size) {
       val outputEachRow = outputSheet.createRow(i)
       val line = lines(i)
@@ -281,8 +282,8 @@ class Tool @Inject()(modeDao: ModeDao) {
         val cell = outputEachRow.createCell(j)
         cell.setCellValue(columns(j))
         val bat = colorLines(i)(1)
-        if (i > 0 && j > 1 && Utils.isDouble(bat)) {
-          if (Utils.isDouble(columns(j))) {
+        if (i > 0 && j > 1 && bat.isDouble) {
+          if (columns(j).isDouble) {
             cell.setCellValue(columns(j).toDouble)
           }
           colorLines(i)(j) match {
