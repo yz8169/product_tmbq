@@ -1,0 +1,21 @@
+
+# Routes
+# This file defines all application routes (Higher priority routes first)
+# ~~~~
+
+# An example controller showing a sample home page
+
+GET        /                                     controllers.AppController.loginBefore
+GET        /tmbq/login                           controllers.AppController.login
+
+
+GET        /tmbq/admin/userManageBefore          controllers.AdminController.userManageBefore
+
+GET        /tmbq/user/missionManageBefore        controllers.UserController.missionManageBefore
+
+
+
+
+# Map static resources from the /public folder to the /assets URL path
+GET        /assets/*file                         controllers.Assets.at(path="/public", file)
+      
