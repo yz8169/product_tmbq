@@ -6,11 +6,13 @@ import scala.scalajs.js
 import myJs.Utils._
 
 /**
-  * Created by yz on 2019/3/14
-  */
+ * Created by yz on 2019/3/14
+ */
 package object Swal {
 
-  def swal(options: SwalOptions)=g.swal(options)
+  def swal(options: SwalOptions) = g.swal(options)
+
+  def swal(options: SwalOptions, f: js.Function) = g.swal(options, f)
 
 }
 
@@ -23,6 +25,20 @@ class SwalOptionsBuilder(val dict: OptMap) extends JSOptionBuilder[SwalOptions, 
   def title(v: String) = jsOpt("title", v)
 
   def `type`(v: String) = jsOpt("type", v)
+
+  def showCancelButton(v: Boolean) = jsOpt("showCancelButton", v)
+
+  def showConfirmButton(v: Boolean) = jsOpt("showConfirmButton", v)
+
+  def confirmButtonClass(v: String) = jsOpt("confirmButtonClass", v)
+
+  def confirmButtonText(v: String) = jsOpt("confirmButtonText", v)
+
+  def closeOnConfirm(v: Boolean) = jsOpt("closeOnConfirm", v)
+
+  def cancelButtonText(v: String) = jsOpt("cancelButtonText", v)
+
+  def showLoaderOnConfirm(v: Boolean) = jsOpt("showLoaderOnConfirm", v)
 
 }
 

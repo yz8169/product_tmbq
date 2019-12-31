@@ -43,6 +43,7 @@ lazy val server = (project in file("server")).settings(commonSettings).settings(
     "org.scala-lang.modules" %% "scala-parallel-collections" % "0.2.0",
     "org.typelevel" %% "cats-core" % "2.0.0",
     "javax.mail" % "mail" % "1.4.7",
+    "org.scala-lang" % "scala-reflect" % "2.13.1"
 
   )
 ).enablePlugins(PlayScala).dependsOn(sharedJvm)
@@ -53,7 +54,7 @@ lazy val client = (project in file("client")).settings(commonSettings).settings(
   libraryDependencies ++= Seq(
     "org.scala-js" %%% "scalajs-dom" % "0.9.7",
     "com.lihaoyi" %%% "scalatags" % "0.7.0",
-    "be.doeraene" %%% "scalajs-jquery" % "0.9.5"
+    "be.doeraene" %%% "scalajs-jquery" % "0.9.5",
   )
 ).enablePlugins(ScalaJSPlugin, ScalaJSWeb).dependsOn(sharedJs)
 

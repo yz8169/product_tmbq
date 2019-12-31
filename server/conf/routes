@@ -5,17 +5,28 @@
 
 # An example controller showing a sample home page
 
-GET         /                                     controllers.AppController.loginBefore
-POST        /tmbq/login                           controllers.AppController.login
+GET         /                                       controllers.AppController.loginBefore
+POST        /tmbq/login                             controllers.AppController.login
 
 
-GET         /tmbq/admin/userManageBefore          controllers.AdminController.userManageBefore
+GET         /tmbq/admin/userManageBefore            controllers.AdminController.userManageBefore
+GET         /tmbq/admin/logout                      controllers.AdminController.logout
+GET         /tmbq/admin/changePasswordBefore        controllers.AdminController.changePasswordBefore
+POST        /tmbq/admin/changePassword              controllers.AdminController.changePassword
+GET         /tmbq/admin/getAllUser                  controllers.AdminController.getAllUser
+GET         /tmbq/admin/getUserById                 controllers.AdminController.getUserById
+GET         /tmbq/admin/deleteUserById              controllers.AdminController.deleteUserById
+POST        /tmbq/admin/addUser                     controllers.AdminController.addUser
+POST        /tmbq/admin/updateUser                  controllers.AdminController.updateUser
+POST        /tmbq/admin/userNameCheck               controllers.AdminController.userNameCheck
 
-GET         /tmbq/user/missionManageBefore        controllers.UserController.missionManageBefore
+GET         /javascriptRoutes                                controllers.AppController.javascriptRoutes
+
+GET         /tmbq/user/missionManageBefore          controllers.UserController.missionManageBefore
 
 
 
 
 # Map static resources from the /public folder to the /assets URL path
-GET         /assets/*file                         controllers.Assets.at(path="/public", file)
+GET         /assets/*file                           controllers.Assets.at(path="/public", file)
       

@@ -36,6 +36,13 @@ class AppController @Inject()(cc: ControllerComponents, formTool: FormTool, acco
   def javascriptRoutes = Action { implicit request =>
     Ok(
       JavaScriptReverseRouter("jsRoutes")(
+        controllers.routes.javascript.AdminController.getAllUser,
+        controllers.routes.javascript.AdminController.userNameCheck,
+        controllers.routes.javascript.AdminController.deleteUserById,
+        controllers.routes.javascript.AdminController.addUser,
+        controllers.routes.javascript.AdminController.getUserById,
+        controllers.routes.javascript.AdminController.updateUser,
+
 
       )
     ).as("text/javascript")
