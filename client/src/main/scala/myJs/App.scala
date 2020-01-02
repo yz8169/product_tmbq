@@ -16,7 +16,12 @@ object App {
     val shareTitle = "TMBQ"
     val beforeTitle = $("#shareTitle").text()
     $("#shareTitle").text(s"${beforeTitle}-${shareTitle}")
+    disableCache
 
+  }
+
+  def disableCache = {
+    $.ajaxSetup(JQueryAjaxSettings.cache(false))
   }
 
 }

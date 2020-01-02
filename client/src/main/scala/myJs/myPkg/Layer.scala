@@ -15,6 +15,8 @@ trait Layer extends js.Object {
 
   def confirm(element: String, options: LayerOptions,yes:js.Function,cancel:js.Function):Int = js.native
 
+  def msg(element: String, options: LayerOptions):Int = js.native
+
 }
 
 object LayerOptions extends LayerOptionsBuilder(noOpts)
@@ -28,6 +30,10 @@ class LayerOptionsBuilder(val dict: OptMap) extends JSOptionBuilder[LayerOptions
   def skin(v: String) = jsOpt("skin", v)
 
   def btn[T](v: js.Array[T]) = jsOpt("btn", v)
+
+  def icon(v: Int) = jsOpt("icon", v)
+
+  def time(v: Int) = jsOpt("time", v)
 
 }
 

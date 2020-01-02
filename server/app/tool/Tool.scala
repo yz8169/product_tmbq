@@ -15,13 +15,15 @@ import org.apache.commons.io.FileUtils
 import org.apache.commons.lang3.StringUtils
 import org.apache.poi.ss.usermodel.{Cell, DateUtil, FillPatternType, IndexedColors}
 import org.apache.poi.xssf.usermodel.{XSSFColor, XSSFWorkbook}
-import play.api.mvc.RequestHeader
+import play.api.mvc.{MultipartFormData, Request, RequestHeader}
 
 import scala.collection.parallel.ForkJoinTaskSupport
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 import implicits.Implicits._
-import tool.Pojo.{CommandData, IndexData}
+import org.zeroturnaround.zip.ZipUtil
+import play.api.libs.Files.TemporaryFile
+import tool.Pojo.{AdminMyDataDir, CommandData, IndexData, MyDataDir}
 
 import scala.collection.parallel.CollectionConverters._
 import scala.jdk.CollectionConverters._
@@ -30,19 +32,37 @@ import scala.jdk.CollectionConverters._
 /**
  * Created by yz on 2018/9/19
  */
-class Tool @Inject()(modeDao: ModeDao) {
+
+object Tool {
+
+  val dbName = "product_tmbq_database"
+  val playPath = new File("../").getAbsolutePath
+  val linuxPath = playPath + s"/${dbName}"
+  val windowsTestDir = new File("G:\\temp")
+  val linuxTestDir = new File(playPath, "workspace")
+  val testDir = if (windowsTestDir.exists()) windowsTestDir else linuxTestDir
+  val windowsPath = s"D:\\${dbName}"
+  val path = {
+    if (new File(windowsPath).exists()) windowsPath else linuxPath
+  }
+  val dataDir = new File(path, "data")
+  val kitDir=new File(dataDir,"kit")
+
+
+  val rPath = {
+    val rPath = "C:\\workspaceForIDEA\\research_tmbq\\server\\rScripts"
+    val linuxRPath = linuxPath + "/rScripts"
+    if (new File(rPath).exists()) rPath else linuxRPath
+  }
+
 
   def generateMissionName = {
     (new DateTime).toString("yyyy_MM_dd_HH_mm_ss")
   }
 
-  def isTestMode = {
+  def isTestMode(implicit modeDao: ModeDao) = {
     val mode = Utils.execFuture(modeDao.select)
     if (mode.test == "t") true else false
-  }
-
-  def createTempDirectory(prefix: String) = {
-    if (isTestMode) Utils.testDir else Files.createTempDirectory(prefix).toFile
   }
 
   def getCompoundDatas(compoundConfigFile: File) = {
@@ -200,8 +220,15 @@ class Tool @Inject()(modeDao: ModeDao) {
     Utils.execFuture(f)
   }
 
-  def deleteDirectory(direcotry: File) = {
+  def deleteDirectory(direcotry: File)(implicit modeDao: ModeDao) = {
     if (!isTestMode) Utils.deleteDirectory(direcotry)
+  }
+
+  def getAdminDataDir(dataDir: File)(implicit request: Request[MultipartFormData[TemporaryFile]]) = {
+    val compoundConfigFile = new File(dataDir, "compound_config.xlsx")
+    WebTool.fileMove("compoundConfigFile", compoundConfigFile)
+    compoundConfigFile.removeEmptyLine
+    AdminMyDataDir(dataDir, compoundConfigFile)
   }
 
   def getUserId(implicit request: RequestHeader) = {
@@ -215,6 +242,10 @@ class Tool @Inject()(modeDao: ModeDao) {
 
   def getUserIdDir(userId: Int) = {
     new File(Utils.userDir, userId.toString)
+  }
+
+  def getKitFile(id: Int) = {
+    new File(Tool.kitDir, s"${id}.xlsx")
   }
 
   def getUserMissionDir(implicit request: RequestHeader) = {
@@ -319,6 +350,10 @@ class Tool @Inject()(modeDao: ModeDao) {
     FileUtils.copyFileToDirectory(rBaseFile, tmpDir)
   }
 
+  def createTempDirectory(prefix: String)(implicit modeDao: ModeDao) = {
+    if (isTestMode) Tool.testDir else Files.createTempDirectory(prefix).toFile
+  }
+
   val standardUnit = "mol/L"
 
   def getmwMap(mw: Double) = {
@@ -364,20 +399,6 @@ class Tool @Inject()(modeDao: ModeDao) {
   def getContentDisposition(url: String) = {
     val encodeUrl = urlEncode(url)
     s"attachment; filename*=utf-8''${encodeUrl}"
-  }
-
-}
-
-object Tool {
-
-  val dbName = "research_tmbq_database"
-  val playPath = new File("../").getAbsolutePath
-  val linuxPath = playPath + s"/${dbName}"
-
-  val rPath = {
-    val rPath = "C:\\workspaceForIDEA\\research_tmbq\\server\\rScripts"
-    val linuxRPath = linuxPath + "/rScripts"
-    if (new File(rPath).exists()) rPath else linuxRPath
   }
 
   def isFindPeak(tmpDir: File, isIndexs: Seq[IndexData], threadNum: Int) = {

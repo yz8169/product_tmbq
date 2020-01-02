@@ -20,7 +20,14 @@ POST        /tmbq/admin/addUser                     controllers.AdminController.
 POST        /tmbq/admin/updateUser                  controllers.AdminController.updateUser
 POST        /tmbq/admin/userNameCheck               controllers.AdminController.userNameCheck
 
-GET         /javascriptRoutes                                controllers.AppController.javascriptRoutes
+GET         /tmbq/admin/kit/kitManageBefore         controllers.KitController.kitManageBefore
+POST        /tmbq/admin/kit/kitNameCheck            controllers.KitController.kitNameCheck
+POST        /tmbq/admin/kit/addKit                  controllers.KitController.addKit
+GET         /tmbq/admin/kit/getAllKit               controllers.KitController.getAllKit
+GET         /tmbq/admin/kit/deleteKitById           controllers.KitController.deleteKitById
+GET         /tmbq/admin/kit/viewKitData             controllers.KitController.viewKitData
+
+GET         /javascriptRoutes                       controllers.AppController.javascriptRoutes
 
 GET         /tmbq/user/missionManageBefore          controllers.UserController.missionManageBefore
 

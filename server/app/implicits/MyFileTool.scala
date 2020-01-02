@@ -28,6 +28,10 @@ trait MyFileTool {
 
     def str = FileUtils.readFileToString(file, "UTF-8")
 
+    def copyTo(destFile: File) = {
+      FileUtils.copyFile(file, destFile)
+    }
+
     def allFiles: List[File] = {
 
       def loop(acc: List[File], files: List[File]): List[File] = {

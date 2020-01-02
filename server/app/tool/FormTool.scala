@@ -21,7 +21,7 @@ class FormTool {
 
   case class userNameData(name: String)
 
-  val userNameForm = Form(
+  val nameForm = Form(
     mapping(
       "name" -> text
     )(userNameData.apply)(userNameData.unapply)

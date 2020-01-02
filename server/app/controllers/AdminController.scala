@@ -16,7 +16,7 @@ import scala.concurrent.Future
  * Created by yz on 2018/7/17
  */
 class AdminController @Inject()(cc: ControllerComponents, formTool: FormTool, accountDao: AccountDao,
-                                userDao: UserDao, tool: Tool) extends AbstractController(cc) {
+                                userDao: UserDao) extends AbstractController(cc) {
 
   def userManageBefore = Action { implicit request =>
     Ok(views.html.admin.userManage())
@@ -62,7 +62,7 @@ class AdminController @Inject()(cc: ControllerComponents, formTool: FormTool, ac
     val data = formTool.idForm.bindFromRequest().get
     userDao.deleteById(data.id).map { x =>
       Future {
-        val userIdDir = tool.getUserIdDir(data.id)
+        val userIdDir = Tool.getUserIdDir(data.id)
         Utils.deleteDirectory(userIdDir)
       }
       Ok("success")
@@ -85,7 +85,7 @@ class AdminController @Inject()(cc: ControllerComponents, formTool: FormTool, ac
   }
 
   def userNameCheck = Action.async { implicit request =>
-    val data = formTool.userNameForm.bindFromRequest.get
+    val data = formTool.nameForm.bindFromRequest.get
     userDao.selectByName(data.name).zip(accountDao.selectById1).map { case (optionUser, admin) =>
       optionUser match {
         case Some(y) => Ok(Json.obj("valid" -> false))

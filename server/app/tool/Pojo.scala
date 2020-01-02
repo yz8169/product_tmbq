@@ -76,6 +76,8 @@ object Pojo {
 
   case class MyDataDir(tmpDir: File, tmpDataDir: File, dataFile: File, sampleConfigExcelFile: File, compoundConfigFile: File)
 
+  case class AdminMyDataDir(tmpDir: File,compoundConfigFile: File)
+
   case class DataFileInfo(sampleIds: List[String])
 
   trait InDir {

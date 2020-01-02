@@ -16,7 +16,7 @@ trait Tables {
   import slick.jdbc.{GetResult => GR}
 
   /** DDL for all tables. Call .create to execute. */
-  lazy val schema: profile.SchemaDescription = Account.schema ++ AdjustMission.schema ++ Mission.schema ++ Mode.schema ++ User.schema
+  lazy val schema: profile.SchemaDescription = Array(Account.schema, AdjustMission.schema, Kit.schema, Mission.schema, Mode.schema, User.schema).reduceLeft(_ ++ _)
   @deprecated("Use .schema instead of .ddl", "3.0")
   def ddl = schema
 
@@ -89,6 +89,32 @@ trait Tables {
   }
   /** Collection-like TableQuery object for table AdjustMission */
   lazy val AdjustMission = new TableQuery(tag => new AdjustMission(tag))
+
+  /** Entity class storing rows of table Kit
+   *  @param id Database column id SqlType(INT), AutoInc, PrimaryKey
+   *  @param name Database column name SqlType(VARCHAR), Length(255,true)
+   *  @param createTime Database column create_time SqlType(DATETIME) */
+  case class KitRow(id: Int, name: String, createTime: DateTime)
+  /** GetResult implicit for fetching KitRow objects using plain SQL queries */
+  implicit def GetResultKitRow(implicit e0: GR[Int], e1: GR[String], e2: GR[DateTime]): GR[KitRow] = GR{
+    prs => import prs._
+    KitRow.tupled((<<[Int], <<[String], <<[DateTime]))
+  }
+  /** Table description of table kit. Objects of this class serve as prototypes for rows in queries. */
+  class Kit(_tableTag: Tag) extends profile.api.Table[KitRow](_tableTag, Some("product_tmbq"), "kit") {
+    def * = (id, name, createTime) <> (KitRow.tupled, KitRow.unapply)
+    /** Maps whole row to an option. Useful for outer joins. */
+    def ? = ((Rep.Some(id), Rep.Some(name), Rep.Some(createTime))).shaped.<>({r=>import r._; _1.map(_=> KitRow.tupled((_1.get, _2.get, _3.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+
+    /** Database column id SqlType(INT), AutoInc, PrimaryKey */
+    val id: Rep[Int] = column[Int]("id", O.AutoInc, O.PrimaryKey)
+    /** Database column name SqlType(VARCHAR), Length(255,true) */
+    val name: Rep[String] = column[String]("name", O.Length(255,varying=true))
+    /** Database column create_time SqlType(DATETIME) */
+    val createTime: Rep[DateTime] = column[DateTime]("create_time")
+  }
+  /** Collection-like TableQuery object for table Kit */
+  lazy val Kit = new TableQuery(tag => new Kit(tag))
 
   /** Entity class storing rows of table Mission
    *  @param id Database column id SqlType(INT), AutoInc, PrimaryKey

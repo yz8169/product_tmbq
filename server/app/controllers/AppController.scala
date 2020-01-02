@@ -43,6 +43,13 @@ class AppController @Inject()(cc: ControllerComponents, formTool: FormTool, acco
         controllers.routes.javascript.AdminController.getUserById,
         controllers.routes.javascript.AdminController.updateUser,
 
+        controllers.routes.javascript.KitController.kitNameCheck,
+        controllers.routes.javascript.KitController.addKit,
+        controllers.routes.javascript.KitController.getAllKit,
+        controllers.routes.javascript.KitController.deleteKitById,
+        controllers.routes.javascript.KitController.viewKitData,
+
+
 
       )
     ).as("text/javascript")
