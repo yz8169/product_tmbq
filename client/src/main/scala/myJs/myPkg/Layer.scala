@@ -17,6 +17,9 @@ trait Layer extends js.Object {
 
   def msg(element: String, options: LayerOptions):Int = js.native
 
+  def open(options: LayerOptions):Int = js.native
+
+
 }
 
 object LayerOptions extends LayerOptionsBuilder(noOpts)
@@ -34,6 +37,20 @@ class LayerOptionsBuilder(val dict: OptMap) extends JSOptionBuilder[LayerOptions
   def icon(v: Int) = jsOpt("icon", v)
 
   def time(v: Int) = jsOpt("time", v)
+
+  def `type`(v: Int) = jsOpt("type", v)
+
+  def area(v: String) = jsOpt("area", v)
+
+  def area(v: js.Array[String]) = jsOpt("area", v)
+
+  def anim(v: Int) = jsOpt("anim", v)
+
+  def shadeClose(v: Boolean) = jsOpt("shadeClose", v)
+
+  def maxmin(v: Boolean) = jsOpt("maxmin", v)
+
+  def content(v: String) = jsOpt("content", v)
 
 }
 

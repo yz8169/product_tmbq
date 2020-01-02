@@ -1,1 +1,151 @@
 @()(implicit request: RequestHeader)
+@main("任务管理")("missionManage") {
+	<style>
+			.genome-pre {
+				white-space: pre-wrap;
+				word-wrap: break-word;
+				border: 0px solid #ccc;
+				background-color: white;
+			}
+	</style>
+	<div class="page-content">
+
+		<div class="page-bar">
+			<ul class="page-breadcrumb">
+				<li>
+					<i class="fa fa fa-table"></i>
+					<a href="">任务管理</a>
+				</li>
+			</ul>
+		</div>
+
+
+		<div class="row-fluid">
+			<div class="row">
+				<div class="col-md-12 col-sm-12">
+					<div class="portlet blue-madison box">
+						<div class="portlet-title">
+							<div class="caption">
+								任务管理
+							</div>
+						</div>
+
+						<div class="portlet-body">
+							<div class="table-responsive">
+
+
+								<table class="display table table-bordered" id="missionTable" data-pagination="true" data-search="true"
+								data-toolbar="#toolbar" data-page-list="[10, 25, 50, 100, all]" data-multiple-search="true">
+									<thead>
+										<tr>
+											<th data-field="missionName" data-sortable="true">任务名</th>
+											<th data-field="state" data-sortable="true"
+											data-formatter="MissionManage.stateFmt"
+											>任务状态</th>
+											<th data-field="startTime" data-sortable="true">开始时间</th>
+											<th data-field="endTime" data-sortable="true">结束时间</th>
+											<th data-field="operate" data-formatter="MissionManage.operateFmt">操作</th>
+										</tr>
+									</thead>
+								</table>
+
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+
+		</div>
+
+	</div>
+
+
+	<script>
+
+			$(function () {
+			    MissionManage.init
+
+				@*var wsUri = "@routes.MissionController.updateMissionSocket().webSocketURL()"*@
+				@*testWebSocket(wsUri);*@
+
+			})
+			
+			@*function updateByHand() {*@
+			@*	setInterval("updateMission()", 3000)*@
+			@*}*@
+
+			@*function updateMission() {*@
+			@*	$.ajax({*@
+			@*		url: "@routes.MissionController.getAllMission()",*@
+			@*		type: "get",*@
+			@*		dataType: "json",*@
+			@*		success: function (data) {*@
+			@*			$("#missionTable").bootstrapTable("load", data)*@
+			@*		}*@
+			@*	})*@
+			@*}*@
+
+
+
+			@*String.prototype.startWith = function (str) {*@
+
+			@*	var reg = new RegExp("^" + str);*@
+
+			@*	return reg.test(this);*@
+
+			@*}*@
+
+
+			@*function testWebSocket(wsUri) {*@
+			@*	function onOpen(evt) {*@
+			@*		doSend(JSON.stringify({*@
+			@*			info: "start"*@
+			@*		}))*@
+			@*	}*@
+
+			@*	function doSend(message) {*@
+			@*		websocket.send(message);*@
+			@*	}*@
+
+			@*	function onClose(evt) {*@
+			@*		console.log('ERROR: ' + evt.code + "," + evt.reason + "," + evt.wasClean);*@
+			@*	}*@
+
+			@*	function onMessage(evt) {*@
+			@*		var message = evt.data*@
+			@*		writeToScreen(message);*@
+
+			@*	}*@
+
+			@*	function onError(evt) {*@
+			@*	    updateByHand()*@
+			@*		console.log('ERROR: ' + evt.code + "," + evt.reason + "," + evt.wasClean);*@
+			@*	}*@
+
+			@*	function writeToScreen(message) {*@
+			@*		var data = $.parseJSON(message)*@
+			@*		$('#missionTable').bootstrapTable("load", data);*@
+			@*	}*@
+
+			@*	var websocket = new WebSocket(wsUri);*@
+			@*	websocket.onopen = function (evt) {*@
+			@*		onOpen(evt)*@
+			@*	};*@
+			@*	websocket.onclose = function (evt) {*@
+			@*		onClose(evt)*@
+			@*	};*@
+			@*	websocket.onmessage = function (evt) {*@
+			@*		onMessage(evt)*@
+			@*	};*@
+			@*	websocket.onerror = function (evt) {*@
+			@*		onError(evt)*@
+			@*	};*@
+			@*}*@
+
+
+
+	</script>
+
+
+}

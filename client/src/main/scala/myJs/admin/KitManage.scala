@@ -31,12 +31,6 @@ object KitManage {
 
   }
 
-  @JSExport("fileInput")
-  def fileInput = {
-    val options = FileInputOptions.showPreview(false).browseLabel("选择...").removeLabel("删除文件").language("zh")
-    $(".file").fileinput(options)
-  }
-
   @JSExport("refreshUser")
   def refreshTable(f: () => js.Any = () => ()) = {
     val url = g.jsRoutes.controllers.KitController.getAllKit().url.toString
@@ -52,7 +46,7 @@ object KitManage {
   @JSExport("operateFmt")
   def operateFmt: js.Function = {
     (v: js.Any, row: js.Dictionary[js.Any]) =>
-      val viewUrl=g.jsRoutes.controllers.KitController.viewKitData().url.toString
+      val viewUrl = g.jsRoutes.controllers.KitController.viewKitData().url.toString
       val viewStr = a(
         title := "查看",
         href := s"${viewUrl}?id=${row("id")}",

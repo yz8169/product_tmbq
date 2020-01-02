@@ -1,14 +1,18 @@
 package myJs
 
-import myJs.myPkg.LayerOptions
+import myJs.myPkg.{FileInputOptions, LayerOptions}
 
 import scala.scalajs.js
 import scalatags.Text.all._
 import myPkg.jquery._
 
+import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
+import myJs.myPkg.Implicits._
+
 /**
   * Created by yz on 2019/3/13
   */
+@JSExportTopLevel("Tool")
 object Tool {
 
   val zhInfo="信息"
@@ -81,6 +85,12 @@ object Tool {
     " ",
     img(src := "/assets/images/running2.gif", width := 30, height := 20, cls := "runningImage")
   ).render
+
+  @JSExport("fileInput")
+  def fileInput = {
+    val options = FileInputOptions.showPreview(false).browseLabel("选择...").removeLabel("删除文件").language("zh")
+    $(".file").fileinput(options)
+  }
 
 
 

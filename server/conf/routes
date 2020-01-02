@@ -5,35 +5,51 @@
 
 # An example controller showing a sample home page
 
-GET         /                                       controllers.AppController.loginBefore
-POST        /tmbq/login                             controllers.AppController.login
+GET         /                                             controllers.AppController.loginBefore
+POST        /tmbq/login                                   controllers.AppController.login
 
 
-GET         /tmbq/admin/userManageBefore            controllers.AdminController.userManageBefore
-GET         /tmbq/admin/logout                      controllers.AdminController.logout
-GET         /tmbq/admin/changePasswordBefore        controllers.AdminController.changePasswordBefore
-POST        /tmbq/admin/changePassword              controllers.AdminController.changePassword
-GET         /tmbq/admin/getAllUser                  controllers.AdminController.getAllUser
-GET         /tmbq/admin/getUserById                 controllers.AdminController.getUserById
-GET         /tmbq/admin/deleteUserById              controllers.AdminController.deleteUserById
-POST        /tmbq/admin/addUser                     controllers.AdminController.addUser
-POST        /tmbq/admin/updateUser                  controllers.AdminController.updateUser
-POST        /tmbq/admin/userNameCheck               controllers.AdminController.userNameCheck
+GET         /tmbq/admin/userManageBefore                  controllers.AdminController.userManageBefore
+GET         /tmbq/admin/logout                            controllers.AdminController.logout
+GET         /tmbq/admin/changePasswordBefore              controllers.AdminController.changePasswordBefore
+POST        /tmbq/admin/changePassword                    controllers.AdminController.changePassword
+GET         /tmbq/admin/getAllUser                        controllers.AdminController.getAllUser
+GET         /tmbq/admin/getUserById                       controllers.AdminController.getUserById
+GET         /tmbq/admin/deleteUserById                    controllers.AdminController.deleteUserById
+POST        /tmbq/admin/addUser                           controllers.AdminController.addUser
+POST        /tmbq/admin/updateUser                        controllers.AdminController.updateUser
+POST        /tmbq/admin/userNameCheck                     controllers.AdminController.userNameCheck
 
-GET         /tmbq/admin/kit/kitManageBefore         controllers.KitController.kitManageBefore
-POST        /tmbq/admin/kit/kitNameCheck            controllers.KitController.kitNameCheck
-POST        /tmbq/admin/kit/addKit                  controllers.KitController.addKit
-GET         /tmbq/admin/kit/getAllKit               controllers.KitController.getAllKit
-GET         /tmbq/admin/kit/deleteKitById           controllers.KitController.deleteKitById
-GET         /tmbq/admin/kit/viewKitData             controllers.KitController.viewKitData
+GET         /tmbq/admin/kit/kitManageBefore               controllers.KitController.kitManageBefore
+POST        /tmbq/admin/kit/kitNameCheck                  controllers.KitController.kitNameCheck
+POST        /tmbq/admin/kit/addKit                        controllers.KitController.addKit
+GET         /tmbq/admin/kit/getAllKit                     controllers.KitController.getAllKit
+GET         /tmbq/admin/kit/deleteKitById                 controllers.KitController.deleteKitById
+GET         /tmbq/admin/kit/viewKitData                   controllers.KitController.viewKitData
 
-GET         /javascriptRoutes                       controllers.AppController.javascriptRoutes
+GET         /tmbq/user/logout                             controllers.UserController.logout
+GET         /tmbq/user/changePasswordBefore               controllers.UserController.changePasswordBefore
+POST        /tmbq/user/changePassword                     controllers.UserController.changePassword
 
-GET         /tmbq/user/missionManageBefore          controllers.UserController.missionManageBefore
+GET         /tmbq/user/mission/getAllMission              controllers.MissionController.getAllMission
+GET         /tmbq/user/mission/newMissionBefore           controllers.MissionController.newMissionBefore
+POST        /tmbq/user/mission/missionNameCheck           controllers.MissionController.missionNameCheck
+POST        /tmbq/user/mission/newMission                 controllers.MissionController.newMission
+GET         /tmbq/user/mission/downloadResult             controllers.MissionController.downloadResult
+GET         /tmbq/user/mission/downloadData               controllers.MissionController.downloadData
+GET         /tmbq/user/mission/getLogContent              controllers.MissionController.getLogContent
+GET         /tmbq/user/mission/deleteMissionById          controllers.MissionController.deleteMissionById
+GET         /tmbq/user/mission/updateMissionSocket        controllers.MissionController.updateMissionSocket
+
+GET         /tmbq/tool/downloadExampleData                controllers.ToolController.downloadExampleData
+
+GET         /javascriptRoutes                             controllers.AppController.javascriptRoutes
+
+GET         /tmbq/user/missionManageBefore                controllers.UserController.missionManageBefore
 
 
 
 
 # Map static resources from the /public folder to the /assets URL path
-GET         /assets/*file                           controllers.Assets.at(path="/public", file)
+GET         /assets/*file                                 controllers.Assets.at(path="/public", file)
       

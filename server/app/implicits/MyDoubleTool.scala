@@ -4,7 +4,6 @@ import java.io.File
 
 import org.apache.commons.io.FileUtils
 import org.apache.commons.lang3.StringUtils
-import utils.Utils.isWindows
 
 import scala.math.log10
 import scala.util.Try

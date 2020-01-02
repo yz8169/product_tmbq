@@ -16,7 +16,7 @@ trait Tables {
   import slick.jdbc.{GetResult => GR}
 
   /** DDL for all tables. Call .create to execute. */
-  lazy val schema: profile.SchemaDescription = Array(Account.schema, AdjustMission.schema, Kit.schema, Mission.schema, Mode.schema, User.schema).reduceLeft(_ ++ _)
+  lazy val schema: profile.SchemaDescription = Array(Account.schema, AdjustMission.schema, Config.schema, Kit.schema, Mission.schema, Mode.schema, User.schema).reduceLeft(_ ++ _)
   @deprecated("Use .schema instead of .ddl", "3.0")
   def ddl = schema
 
@@ -90,6 +90,29 @@ trait Tables {
   /** Collection-like TableQuery object for table AdjustMission */
   lazy val AdjustMission = new TableQuery(tag => new AdjustMission(tag))
 
+  /** Entity class storing rows of table Config
+   *  @param kind Database column kind SqlType(VARCHAR), PrimaryKey, Length(255,true)
+   *  @param value Database column value SqlType(VARCHAR), Length(255,true) */
+  case class ConfigRow(kind: String, value: String)
+  /** GetResult implicit for fetching ConfigRow objects using plain SQL queries */
+  implicit def GetResultConfigRow(implicit e0: GR[String]): GR[ConfigRow] = GR{
+    prs => import prs._
+    ConfigRow.tupled((<<[String], <<[String]))
+  }
+  /** Table description of table config. Objects of this class serve as prototypes for rows in queries. */
+  class Config(_tableTag: Tag) extends profile.api.Table[ConfigRow](_tableTag, Some("product_tmbq"), "config") {
+    def * = (kind, value) <> (ConfigRow.tupled, ConfigRow.unapply)
+    /** Maps whole row to an option. Useful for outer joins. */
+    def ? = ((Rep.Some(kind), Rep.Some(value))).shaped.<>({r=>import r._; _1.map(_=> ConfigRow.tupled((_1.get, _2.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+
+    /** Database column kind SqlType(VARCHAR), PrimaryKey, Length(255,true) */
+    val kind: Rep[String] = column[String]("kind", O.PrimaryKey, O.Length(255,varying=true))
+    /** Database column value SqlType(VARCHAR), Length(255,true) */
+    val value: Rep[String] = column[String]("value", O.Length(255,varying=true))
+  }
+  /** Collection-like TableQuery object for table Config */
+  lazy val Config = new TableQuery(tag => new Config(tag))
+
   /** Entity class storing rows of table Kit
    *  @param id Database column id SqlType(INT), AutoInc, PrimaryKey
    *  @param name Database column name SqlType(VARCHAR), Length(255,true)
@@ -122,18 +145,19 @@ trait Tables {
    *  @param userId Database column user_id SqlType(INT)
    *  @param startTime Database column start_time SqlType(DATETIME)
    *  @param endTime Database column end_time SqlType(DATETIME), Default(None)
-   *  @param state Database column state SqlType(VARCHAR), Length(255,true) */
-  case class MissionRow(id: Int, missionName: String, userId: Int, startTime: DateTime, endTime: Option[DateTime] = None, state: String)
+   *  @param state Database column state SqlType(VARCHAR), Length(255,true)
+   *  @param cpu Database column cpu SqlType(INT) */
+  case class MissionRow(id: Int, missionName: String, userId: Int, startTime: DateTime, endTime: Option[DateTime] = None, state: String, cpu: Int)
   /** GetResult implicit for fetching MissionRow objects using plain SQL queries */
   implicit def GetResultMissionRow(implicit e0: GR[Int], e1: GR[String], e2: GR[DateTime], e3: GR[Option[DateTime]]): GR[MissionRow] = GR{
     prs => import prs._
-    MissionRow.tupled((<<[Int], <<[String], <<[Int], <<[DateTime], <<?[DateTime], <<[String]))
+    MissionRow.tupled((<<[Int], <<[String], <<[Int], <<[DateTime], <<?[DateTime], <<[String], <<[Int]))
   }
   /** Table description of table mission. Objects of this class serve as prototypes for rows in queries. */
   class Mission(_tableTag: Tag) extends profile.api.Table[MissionRow](_tableTag, Some("product_tmbq"), "mission") {
-    def * = (id, missionName, userId, startTime, endTime, state) <> (MissionRow.tupled, MissionRow.unapply)
+    def * = (id, missionName, userId, startTime, endTime, state, cpu) <> (MissionRow.tupled, MissionRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
-    def ? = ((Rep.Some(id), Rep.Some(missionName), Rep.Some(userId), Rep.Some(startTime), endTime, Rep.Some(state))).shaped.<>({r=>import r._; _1.map(_=> MissionRow.tupled((_1.get, _2.get, _3.get, _4.get, _5, _6.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+    def ? = ((Rep.Some(id), Rep.Some(missionName), Rep.Some(userId), Rep.Some(startTime), endTime, Rep.Some(state), Rep.Some(cpu))).shaped.<>({r=>import r._; _1.map(_=> MissionRow.tupled((_1.get, _2.get, _3.get, _4.get, _5, _6.get, _7.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
 
     /** Database column id SqlType(INT), AutoInc, PrimaryKey */
     val id: Rep[Int] = column[Int]("id", O.AutoInc, O.PrimaryKey)
@@ -147,6 +171,8 @@ trait Tables {
     val endTime: Rep[Option[DateTime]] = column[Option[DateTime]]("end_time", O.Default(None))
     /** Database column state SqlType(VARCHAR), Length(255,true) */
     val state: Rep[String] = column[String]("state", O.Length(255,varying=true))
+    /** Database column cpu SqlType(INT) */
+    val cpu: Rep[Int] = column[Int]("cpu")
   }
   /** Collection-like TableQuery object for table Mission */
   lazy val Mission = new TableQuery(tag => new Mission(tag))

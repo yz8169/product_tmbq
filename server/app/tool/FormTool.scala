@@ -2,11 +2,11 @@ package tool
 
 import play.api.data._
 import play.api.data.Forms._
+import tool.Pojo.{MissionNameData, UserData}
 
 /**
   * Created by yz on 2018/7/17
   */
-case class UserData(name: String, password: String)
 
 class FormTool {
 
@@ -50,18 +50,6 @@ class FormTool {
       "newPassword" -> text
     )(ChangePasswordData.apply)(ChangePasswordData.unapply)
   )
-
-  case class MissionData(missionName: String, threadNum: Int, isPlot: Boolean)
-
-  val missionForm = Form(
-    mapping(
-      "missionName" -> text,
-      "threadNum" -> number,
-      "isPlot" -> boolean
-    )(MissionData.apply)(MissionData.unapply)
-  )
-
-  case class MissionNameData(missionName: String)
 
   val missionNameForm = Form(
     mapping(

@@ -16,8 +16,4 @@ object BootstrapJQueryContext {
     object bootstrap extends js.Object
   }
 
-  def useNpmImports(): Unit = {
-    JQueryContext.useNpmImport()
-    imports.bootstrap
-  }
 }

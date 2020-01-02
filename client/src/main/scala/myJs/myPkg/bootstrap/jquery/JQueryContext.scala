@@ -14,19 +14,11 @@ trait JQueryContext {
 }
 
 object JQueryContext {
-  var jQuery: JQueryStatic = org.scalajs.jquery.jQuery
+  val jQuery: JQueryStatic = org.scalajs.jquery.jQuery
 
   object imports {
     @js.native
     @JSImport("jquery", JSImport.Namespace)
     object jQuery extends JQueryStatic
-  }
-
-  def useStatic(): Unit = {
-    jQuery = org.scalajs.jquery.jQuery
-  }
-
-  def useNpmImport(): Unit = {
-    jQuery = imports.jQuery
   }
 }

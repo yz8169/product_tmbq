@@ -4,7 +4,7 @@ import javax.inject.Inject
 import models.Tables._
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import slick.jdbc.JdbcProfile
-import tool.UserData
+import tool.Pojo.UserData
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global

@@ -27,6 +27,7 @@ import tool.Pojo.{AdminMyDataDir, CommandData, IndexData, MyDataDir}
 
 import scala.collection.parallel.CollectionConverters._
 import scala.jdk.CollectionConverters._
+import models.Tables._
 
 
 /**
@@ -46,7 +47,9 @@ object Tool {
     if (new File(windowsPath).exists()) windowsPath else linuxPath
   }
   val dataDir = new File(path, "data")
-  val kitDir=new File(dataDir,"kit")
+  val kitDir = new File(dataDir, "kit")
+  val userDir = new File(path, "user")
+  val exampleDir = new File(path, "example")
 
 
   val rPath = {
@@ -55,6 +58,27 @@ object Tool {
     if (new File(rPath).exists()) rPath else linuxRPath
   }
 
+  val availCpu = Runtime.getRuntime.availableProcessors() - 1
+
+  def getMissionWorkspaceDir(mission: MissionRow) = {
+    val missionIdDir = getMissionIdDir(mission)
+    new File(missionIdDir, "workspace")
+  }
+
+  def getMissionIdDir(mission: MissionRow) = {
+    val userMissionFile = getUserMissionDir(mission.userId)
+    new File(userMissionFile, mission.id.toString)
+  }
+
+  def getMissionResultDir(mission: MissionRow) = {
+    val missionIdDir = getMissionIdDir(mission)
+    new File(missionIdDir, "result")
+  }
+
+  def getUserMissionDir(userId: Int) = {
+    val userIdDir = getUserIdDir(userId)
+    new File(userIdDir, "mission")
+  }
 
   def generateMissionName = {
     (new DateTime).toString("yyyy_MM_dd_HH_mm_ss")
@@ -237,11 +261,11 @@ object Tool {
 
   def getUserIdDir(implicit request: RequestHeader) = {
     val userId = getUserId
-    new File(Utils.userDir, userId.toString)
+    new File(Tool.userDir, userId.toString)
   }
 
   def getUserIdDir(userId: Int) = {
-    new File(Utils.userDir, userId.toString)
+    new File(Tool.userDir, userId.toString)
   }
 
   def getKitFile(id: Int) = {
@@ -256,6 +280,24 @@ object Tool {
   def getUserAdjustMissionDir(implicit request: RequestHeader) = {
     val userIdDir = getUserIdDir
     new File(userIdDir, "adjust_mission")
+  }
+
+  def getMissionDefaultThreadNum(implicit configDao: ConfigDao) = {
+    Utils.execFuture(configDao.selectThreadNum).value.toInt
+  }
+
+  def getDataDir(dataDir: File)(implicit request: Request[MultipartFormData[TemporaryFile]]) = {
+    val dataFile = new File(dataDir, "data.zip")
+    WebTool.fileMove("dataFile", dataFile)
+    val sampleConfigFile = new File(dataDir, "sample_config.xlsx")
+    WebTool.fileMove("sampleConfigFile", sampleConfigFile)
+    sampleConfigFile.removeEmptyLine
+    val compoundConfigFile = new File(dataDir, "compound_config.xlsx")
+    WebTool.fileMove("compoundConfigFile", compoundConfigFile)
+    compoundConfigFile.removeEmptyLine
+    val tmpDataDir = new File(dataDir, "tmpData").reCreateDirectoryWhenExist
+    ZipUtil.unpack(dataFile, tmpDataDir)
+    MyDataDir(dataDir, tmpDataDir, dataFile, sampleConfigFile, compoundConfigFile)
   }
 
   def getMissionIdDirById(missionId: Int)(implicit request: RequestHeader) = {
@@ -346,7 +388,7 @@ object Tool {
   }
 
   def productBaseRFile(tmpDir: File) = {
-    val rBaseFile = new File(Utils.rPath, "base.R")
+    val rBaseFile = new File(Tool.rPath, "base.R")
     FileUtils.copyFileToDirectory(rBaseFile, tmpDir)
   }
 

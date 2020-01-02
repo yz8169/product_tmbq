@@ -15,6 +15,8 @@ trait FileInputJQuery extends js.Object {
 
   def fileinput(options: FileInputOptions): JQuery = scalajs.js.native
 
+  def fileinput(method: String): JQuery = scalajs.js.native
+
 }
 
 object FileInputOptions extends FileInputOptionsBuilder(noOpts)
