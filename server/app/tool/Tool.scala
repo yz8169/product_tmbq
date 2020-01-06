@@ -23,7 +23,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import implicits.Implicits._
 import org.zeroturnaround.zip.ZipUtil
 import play.api.libs.Files.TemporaryFile
-import tool.Pojo.{AdminMyDataDir, CommandData, IndexData, MyDataDir}
+import tool.Pojo.{AdminMyDataDir, CommandData, IndexData, MyDataDir, StdData}
 
 import scala.collection.parallel.CollectionConverters._
 import scala.jdk.CollectionConverters._
@@ -50,12 +50,18 @@ object Tool {
   val kitDir = new File(dataDir, "kit")
   val userDir = new File(path, "user")
   val exampleDir = new File(path, "example")
-
+  val binDir = new File(path, "bin")
 
   val rPath = {
-    val rPath = "C:\\workspaceForIDEA\\research_tmbq\\server\\rScripts"
+    val rPath = "C:\\workspaceForIDEA\\product_tmbq\\server\\rScripts"
     val linuxRPath = linuxPath + "/rScripts"
     if (new File(rPath).exists()) rPath else linuxRPath
+  }
+
+  val pyPath = {
+    val windowsPath = "C:\\workspaceForIDEA\\product_tmbq\\server\\pyScripts"
+    val linuxPyPath = linuxPath + "/pyScripts"
+    if (new File(windowsPath).exists()) windowsPath else linuxPyPath
   }
 
   val availCpu = Runtime.getRuntime.availableProcessors() - 1
@@ -214,6 +220,63 @@ object Tool {
     Utils.execFuture(f)
   }
 
+  def getSampleConfigFile(workspaceDir: File) = {
+    new File(workspaceDir, "sample_config.xlsx")
+  }
+
+  def getSimpleCompoundFile(workspaceDir: File) = {
+    new File(workspaceDir, "simple_compound.xlsx")
+  }
+
+  def getStdData(workspaceDir: File) = {
+    val parent = workspaceDir.getParentFile
+    val lines = Tool.getSampleConfigFile(parent).xlsxLines()
+    val batchs = lines.lineMap.map { map =>
+      (map("batch"), map("file name"))
+    }.groupMap(_._1)(_._2)
+    val fileNames = batchs.find { case (batch, fileNames) =>
+      List("std_7", "std_8").forall(x => fileNames.toLowerCase.exists(y => y.endsWith(x)))
+    }.head._2.toLowerCase
+    val std7FileName = fileNames.find(_.endsWith("std_7")).head
+    val std8FileName = fileNames.find(_.endsWith("std_8")).head
+    val std7File = new File(parent, s"data/${std7FileName}.txt")
+    val std8File = new File(parent, s"data/${std8FileName}.txt")
+    val compoundFile = new File(workspaceDir, "correct_before_compound.xlsx")
+    new File(parent, "compound_config.xlsx").copyTo(compoundFile)
+    val outFile = new File(workspaceDir, "correct_after_config.xlsx")
+    StdData(std7File, std8File, compoundFile, outFile)
+  }
+
+  def getConfigFile(workspaceDir: File) = {
+    new File(workspaceDir, "config.txt")
+  }
+
+  def getCompoundFile(workspaceDir: File) = {
+    new File(workspaceDir, "compound_config.xlsx")
+  }
+
+  def getDataFile(workspaceDir: File) = {
+    new File(workspaceDir, "data.zip")
+  }
+
+  def rtCorrect(workspaceDir: File) = {
+    val rtCorrectWorkspaceDir = new File(workspaceDir, "rtCorrect").reCreateDirectoryWhenExist
+    val configFile = getConfigFile(workspaceDir)
+    val configMap = configFile.txtLines.map { columns =>
+      (columns(0) -> columns(1))
+    }.toMap
+    val isRtCorrect = configMap("rtCorrect")
+    if (isRtCorrect == "true") {
+      val stdData = Tool.getStdData(rtCorrectWorkspaceDir)
+      val command =
+        s"""
+           |python ${new File(Tool.pyPath, "rt_finder.py").unixPath} --std7 ${stdData.std7File.unixPath} --std8 ${stdData.std8File.unixPath}   --compound ${stdData.compoundFile.unixPath} --o ${stdData.outFile.unixPath}
+           |cp ${stdData.outFile.unixPath} ${Tool.getCompoundFile(workspaceDir).unixPath}
+           """.stripMargin
+      CommandData(rtCorrectWorkspaceDir, List(command))
+    } else CommandData(rtCorrectWorkspaceDir, List(""))
+  }
+
   def productAgilentDtaFiles(tmpDir: File, compoundConfigFile: File, dataDir: File, threadNum: Int) = {
     val dtaDir = new File(tmpDir, "dta").createDirectoryWhenNoExist
     val compounds = getCompoundDatas(compoundConfigFile)
@@ -242,6 +305,14 @@ object Tool {
       }
     }.toBuffer.reduceLeft(_ zip _ map (x => ()))
     Utils.execFuture(f)
+  }
+
+  def productCompoundFile(workspaceDir: File, tmpCompoundFile: File, dbCompoundFile: File) = {
+    println(tmpCompoundFile,dbCompoundFile)
+    val tmpCompoundLines = tmpCompoundFile.xlsxLines()
+    val dbCompoundLines = dbCompoundFile.xlsxLines().selectRemove("rt")
+    tmpCompoundLines.leftJoin(dbCompoundLines, by = "compound").
+      toXlsxFile(new File(workspaceDir, "compound_config.xlsx"))
   }
 
   def deleteDirectory(direcotry: File)(implicit modeDao: ModeDao) = {
@@ -287,13 +358,10 @@ object Tool {
   }
 
   def getDataDir(dataDir: File)(implicit request: Request[MultipartFormData[TemporaryFile]]) = {
-    val dataFile = new File(dataDir, "data.zip")
-    WebTool.fileMove("dataFile", dataFile)
-    val sampleConfigFile = new File(dataDir, "sample_config.xlsx")
-    WebTool.fileMove("sampleConfigFile", sampleConfigFile)
+    val dataFile = WebTool.fileMoveDir("dataFile", dataDir)
+    val sampleConfigFile = WebTool.fileMoveDir("sampleConfigFile", dataDir)
     sampleConfigFile.removeEmptyLine
-    val compoundConfigFile = new File(dataDir, "compound_config.xlsx")
-    WebTool.fileMove("compoundConfigFile", compoundConfigFile)
+    val compoundConfigFile = WebTool.fileMoveDir("compoundConfigFile", dataDir)
     compoundConfigFile.removeEmptyLine
     val tmpDataDir = new File(dataDir, "tmpData").reCreateDirectoryWhenExist
     ZipUtil.unpack(dataFile, tmpDataDir)
@@ -394,6 +462,12 @@ object Tool {
 
   def createTempDirectory(prefix: String)(implicit modeDao: ModeDao) = {
     if (isTestMode) Tool.testDir else Files.createTempDirectory(prefix).toFile
+  }
+
+  def produceConfigFile(rtCorrect: Boolean, workspaceDir: File) = {
+    val configFile = getConfigFile(workspaceDir)
+    List(List("arg", "value"), List("rtCorrect", rtCorrect.toString)).toTxtFile(configFile)
+    configFile
   }
 
   val standardUnit = "mol/L"

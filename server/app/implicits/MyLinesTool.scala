@@ -73,7 +73,7 @@ trait MyLinesTool {
 
     def flatMapSetByColumns[T](f: List[String] => Set[T])(implicit sep: String = "\t") = {
       lines.flatMap { line =>
-        val columns =line.mySplit(sep)
+        val columns = line.mySplit(sep)
         f(columns)
       }.toSet
 
@@ -81,7 +81,7 @@ trait MyLinesTool {
 
     def flatMapByColumns[T](f: List[String] => Seq[T])(implicit sep: String = "\t") = {
       lines.flatMap { line =>
-        val columns =line.mySplit(sep)
+        val columns = line.mySplit(sep)
         f(columns)
       }
 
@@ -126,6 +126,8 @@ trait MyLinesTool {
     def toXlsxFile(xlsxFile: File) = {
       val outputWorkbook = new XSSFWorkbook()
       val outputSheet = outputWorkbook.createSheet("Sheet1")
+      val cellStyle = outputWorkbook.createCellStyle()
+      cellStyle.setDataFormat(outputWorkbook.getCreationHelper.createDataFormat().getFormat("#.#"))
       for (i <- 0 until lines.size) {
         val outputEachRow = outputSheet.createRow(i)
         val line = lines(i)
@@ -134,6 +136,7 @@ trait MyLinesTool {
           val cell = outputEachRow.createCell(j)
           if (columns(j).isDouble) {
             cell.setCellValue(columns(j).toDouble)
+//            cell.setCellStyle(cellStyle)
           } else {
             cell.setCellValue(columns(j))
           }

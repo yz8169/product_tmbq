@@ -26,10 +26,20 @@ trait MyFileTool {
 
     def lines(encoding: String = "UTF-8") = FileUtils.readLines(file, encoding).asScala.toList
 
+    def txtLines = lines().map(_.split("\t").toList)
+
     def str = FileUtils.readFileToString(file, "UTF-8")
 
     def copyTo(destFile: File) = {
       FileUtils.copyFile(file, destFile)
+    }
+
+    def fileCopyToDir(destDir: File) = {
+      FileUtils.copyFileToDirectory(file, destDir)
+    }
+
+    def dirCopyToDir(destDir: File) = {
+      FileUtils.copyDirectoryToDirectory(file, destDir)
     }
 
     def allFiles: List[File] = {

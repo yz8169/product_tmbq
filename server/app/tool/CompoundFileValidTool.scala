@@ -216,7 +216,7 @@ class CompoundFileValidTool(lines: List[List[String]]) {
       val value = op.get
       val j = headers.indexOf(header)
       val i = totalColumns.lastIndexOf(value)
-      s"""${fileInfo.capitalize}第${i + 2}行第${j + 1}列必须为none或者某个存在的内标化合物的index列名称!"""
+      s"""${fileInfo}第${i + 2}行第${j + 1}列必须为none或者某个存在的内标化合物的index列名称!"""
     } else ""
     Validated.cond(inValid, true, inMessage)
   }

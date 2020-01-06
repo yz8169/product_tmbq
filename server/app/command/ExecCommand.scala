@@ -2,10 +2,12 @@ package command
 
 import java.io.File
 
+import command.CommandExec.{CommandError, CommandSuccess}
+
 import scala.sys.process
 import scala.sys.process._
 
-case class ExecCommand(isSuccess: Boolean = true,err:StringBuilder=new StringBuilder) {
+case class ExecCommand(isSuccess: Boolean = true, err: StringBuilder = new StringBuilder) {
   val out = new StringBuilder
   val log = ProcessLogger(out append _ append "\n", err append _ append "\n")
 
@@ -39,13 +41,21 @@ case class ExecCommand(isSuccess: Boolean = true,err:StringBuilder=new StringBui
 
   def getLogStr = out.toString() + "\n" + err.toString()
 
+  def toCommandExec: CommandExec[String, Boolean] = {
+    if (isSuccess) {
+      CommandSuccess(true)
+    } else {
+      CommandError(err.toString())
+    }
+  }
+
 
 }
 
-object ExecCommand{
+object ExecCommand {
 
-  def apply(isSuccess:Boolean=false,err:StringBuilder=new StringBuilder)={
-    new ExecCommand(isSuccess,err)
+  def apply(isSuccess: Boolean = true, err: StringBuilder = new StringBuilder) = {
+    new ExecCommand(isSuccess, err)
   }
 
 }

@@ -33,8 +33,6 @@ object Pojo {
 
   case class IndexData(index: String, compoundName: String)
 
-  case class MissionData(kind: String, email: Option[String])
-
   trait ConfigFileT extends MyDir {
     val configFile: File
   }
@@ -77,13 +75,17 @@ object Pojo {
 
   case class MyDataDir(tmpDir: File, tmpDataDir: File, dataFile: File, sampleConfigExcelFile: File, compoundConfigFile: File)
 
-  case class AdminMyDataDir(tmpDir: File,compoundConfigFile: File)
+  case class AdminMyDataDir(tmpDir: File, compoundConfigFile: File)
 
   case class DataFileInfo(sampleIds: List[String])
 
   case class MissionNameData(missionName: String)
 
-  case class MyDao(missionDao:MissionDao,configDao:ConfigDao)
+  case class MissionData(missionName: String, kitId: Int, rtCorrect: Boolean)
+
+  case class StdData(std7File: File, std8File: File, compoundFile: File,outFile:File)
+
+  case class MyDao(missionDao: MissionDao, configDao: ConfigDao)
 
   trait InDir {
     val dir01: File = new File(".")

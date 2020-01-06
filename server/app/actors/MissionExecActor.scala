@@ -5,7 +5,7 @@ import java.nio.file.Files
 
 import akka.actor.{Actor, ActorSystem, PoisonPill}
 import akka.stream.Materializer
-import command.CommandExecutor
+import command.CommandExec
 import dao._
 import javax.inject.Inject
 import models.Tables._
@@ -23,6 +23,7 @@ import scala.concurrent.Future
 import scala.util.{Failure, Success}
 import implicits.Implicits._
 import org.zeroturnaround.zip.ZipUtil
+import tool.Tool.getConfigFile
 
 /**
  * Created by Administrator on 2019/10/24
@@ -45,14 +46,15 @@ class MissionExecActor @Inject()(mission: MissionRow)(implicit val system: Actor
         val resultDir = Tool.getMissionResultDir(mission)
         val tmpDataDir = new File(workspaceDir, "tmpData")
         val dataDir = new File(workspaceDir, "data").createDirectoryWhenNoExist
-        val commandExecutor = CommandExecutor(logFile = logFile)
         val file = new File(workspaceDir, "data.zip")
         tmpDataDir.allFiles.foreach { file =>
           val destFile = new File(dataDir, file.getName.toLowerCase)
           FileUtils.copyFile(file, destFile)
         }
         val threadNum = mission.cpu
-        val compoundConfigFile = new File(workspaceDir, "compound_config.xlsx")
+        val tmpCompoundConfigFile = Tool.getSimpleCompoundFile(workspaceDir)
+        val dbCompoundConfigFile = new File(workspaceDir, "db_compound.xlsx")
+        val compoundConfigFile = Tool.productCompoundFile(workspaceDir, tmpCompoundConfigFile, dbCompoundConfigFile)
         Tool.productDtaFiles(workspaceDir, compoundConfigFile, dataDir, threadNum)
 
         val rBaseFile = new File(Tool.rPath, "base.R")
@@ -64,26 +66,39 @@ class MissionExecActor @Inject()(mission: MissionRow)(implicit val system: Actor
         }
         val isIndexs = indexDatas.filter(x => x.index.startWithsIgnoreCase("is"))
 
-        commandExecutor.exec { () =>
-          //is find peak
+        val commandExec = CommandExec().exec { b =>
+          Tool.rtCorrect(workspaceDir)
+        }.map { b =>
+          val configFile = getConfigFile(workspaceDir)
+          val configMap = configFile.txtLines.map { columns =>
+            (columns(0) -> columns(1))
+          }.toMap
+          val isRtCorrect = configMap("rtCorrect")
+          if (isRtCorrect.toBoolean) {
+            val compoundFile = Tool.getCompoundFile(workspaceDir)
+            compoundFile.xlsxLines().toXlsxFile(compoundFile)
+            val correctLines = compoundFile.xlsxLines().selectColumns(List("compound", "rt")).rename("rt" -> "Corrected_RT")
+            val correctedFile = new File(resultDir, "Corrected_RT.xlsx")
+            tmpCompoundConfigFile.xlsxLines().leftJoin(correctLines, "compound").toXlsxFile(correctedFile)
+          }
+        }.parExec { b =>
           Tool.isFindPeak(workspaceDir, isIndexs, threadNum)
-        }.exec { () =>
-          //is merge
+        }.exec { b =>
           Tool.isMerge(workspaceDir, isIndexs)
-        }.exec { () =>
-          //compound find peak
+        }.parExec { b =>
           Tool.cFindPeak(workspaceDir, indexDatas, threadNum)
-        }.exec { () =>
+        }.exec { b =>
           //intensity merge
           Tool.intensityMerge(workspaceDir)
-        }.exec { () =>
+        }.parExec { b =>
           //regress
           Tool.eachRegress(workspaceDir, threadNum)
-        }.exec { () =>
+        }.exec { b =>
           //all merge
           Tool.allMerge(workspaceDir)
         }
-        val state = if (commandExecutor.isSuccess) {
+
+        val state = if (commandExec.isSuccess) {
           val intensityTxtFile = new File(workspaceDir, "intensity.txt")
           val intensityExcelFile = new File(resultDir, "intensity.xlsx")
           intensityTxtFile.toXlsxFile(intensityExcelFile)
@@ -94,13 +109,9 @@ class MissionExecActor @Inject()(mission: MissionRow)(implicit val system: Actor
 
           FileUtils.copyDirectoryToDirectory(new File(workspaceDir, "plot_peaks"), resultDir)
           FileUtils.copyDirectoryToDirectory(new File(workspaceDir, "plot_regress"), resultDir)
-          val originalDataDir = new File(resultDir.getParent, "data").createDirectoryWhenNoExist
-          val sampleConfigExcelFile = new File(workspaceDir, "sample_config.xlsx")
-          FileUtils.copyFileToDirectory(sampleConfigExcelFile, originalDataDir)
-          FileUtils.copyFileToDirectory(compoundConfigFile, originalDataDir)
-          FileUtils.copyFileToDirectory(file, originalDataDir)
           "success"
         } else {
+          commandExec.errorInfo.toFile(logFile)
           "error"
         }
         val newMission = mission.copy(state = state, endTime = Some(new DateTime()))

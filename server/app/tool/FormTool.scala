@@ -2,11 +2,11 @@ package tool
 
 import play.api.data._
 import play.api.data.Forms._
-import tool.Pojo.{MissionNameData, UserData}
+import tool.Pojo.{MissionData, MissionNameData, UserData}
 
 /**
-  * Created by yz on 2018/7/17
-  */
+ * Created by yz on 2018/7/17
+ */
 
 class FormTool {
 
@@ -57,6 +57,14 @@ class FormTool {
     )(MissionNameData.apply)(MissionNameData.unapply)
   )
 
+  val missionForm = Form(
+    mapping(
+      "missionName" -> text,
+      "kitId" -> number,
+      "rtCorrect" -> boolean,
+    )(MissionData.apply)(MissionData.unapply)
+  )
+
   case class AdjustMissionData(mission: String)
 
   val adjustMissionForm = Form(
@@ -92,7 +100,7 @@ class FormTool {
 
   case class ParamAdjustData(missionName: String, missionId: Int, compoundName: String, flMin: String, flMax: String, step: String, nups: String,
                              ndowns: String, snr: String, iteration: String, bLine: String, rtlw: String, rtrw: String,
-                             rt:String,peakLocation:String)
+                             rt: String, peakLocation: String)
 
   val paramAdjustForm = Form(
     mapping(

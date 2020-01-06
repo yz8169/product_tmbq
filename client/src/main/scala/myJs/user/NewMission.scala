@@ -25,10 +25,24 @@ object NewMission {
 
   @JSExport("init")
   def init = {
-
+    refreshKit
     bootStrapValidator
     $("#form").bootstrapValidator("revalidateField", "missionName")
 
+  }
+
+  def refreshKit = {
+    val url = g.jsRoutes.controllers.KitController.getAllKit().url.toString
+    val ajaxSettings = JQueryAjaxSettings.url(s"${url}?").contentType("application/json").
+      `type`("get").success { (data: js.Any, status: String, e: JQueryXHR) =>
+      val rs = data.asInstanceOf[js.Array[js.Dictionary[String]]]
+      val select2Data = rs.map { dict =>
+        js.Dictionary("id" -> dict("id"), "text" -> dict("name"))
+      }.toJSArray
+      val options = Select2Options.dictData(select2Data)
+      $(":input[name='kitId']").select2(options)
+    }
+    $.ajax(ajaxSettings)
   }
 
   @JSExport("myRun")

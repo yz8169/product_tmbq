@@ -12,13 +12,13 @@ import implicits.Implicits._
  */
 object FileTool {
 
-  def fileCheck(myTmpDir: MyDataDir) = {
+  def fileCheck(myTmpDir: MyDataDir, dbCompounds: Set[String],isRtCorrect:Boolean) = {
     val fileNames = myTmpDir.tmpDataDir.allFiles.map(_.getName).filter(StringUtils.isNotBlank(_)).
       map(_.fileNamePrefix).map(_.toLowerCase())
     val compoundConfigFile = myTmpDir.compoundConfigFile
     val sampleConfigFile = myTmpDir.sampleConfigExcelFile
-    FileTool.compoundFileCheck(compoundConfigFile, sampleConfigFile).andThen { b =>
-      FileTool.sampleFileCheck(sampleConfigFile, fileNames)
+    FileTool.compoundFileCheck(compoundConfigFile, sampleConfigFile, dbCompounds).andThen { b =>
+      FileTool.sampleFileCheck(sampleConfigFile, fileNames,isRtCorrect)
     }.toMyMessage
 
   }
@@ -28,10 +28,10 @@ object FileTool {
     FileTool.adminCompoundFileCheck(compoundConfigFile).toMyMessage
   }
 
-  def compoundFileCheck(file: File, sampleConfigFile: File) = {
+  def compoundFileCheck(file: File, sampleConfigFile: File, dbCompounds: Set[String]) = {
     val sampleHeaders = sampleConfigFile.xlsxLines().map(x => x.toLowerCase).head
     val lines = file.xlsxLines().map(_.toLowerCase)
-    CompoundFileValidTool.valid(lines, sampleHeaders)
+    SimpleCompoundFileValidTool.valid(lines, sampleHeaders, dbCompounds)
   }
 
   def adminCompoundFileCheck(file: File) = {
@@ -39,9 +39,9 @@ object FileTool {
     CompoundFileValidTool.adminValid(lines)
   }
 
-  def sampleFileCheck(file: File, fileNames: List[String]) = {
+  def sampleFileCheck(file: File, fileNames: List[String], isRtCorrect: Boolean) = {
     val lines = file.xlsxLines().map(_.toLowerCase)
-    SampleFileValidTool.valid(lines, fileNames)
+    SampleFileValidTool.valid(lines, fileNames, isRtCorrect)
   }
 
 }

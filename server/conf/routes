@@ -23,7 +23,7 @@ POST        /tmbq/admin/userNameCheck                     controllers.AdminContr
 GET         /tmbq/admin/kit/kitManageBefore               controllers.KitController.kitManageBefore
 POST        /tmbq/admin/kit/kitNameCheck                  controllers.KitController.kitNameCheck
 POST        /tmbq/admin/kit/addKit                        controllers.KitController.addKit
-GET         /tmbq/admin/kit/getAllKit                     controllers.KitController.getAllKit
+GET         /tmbq/kit/getAllKit                           controllers.KitController.getAllKit
 GET         /tmbq/admin/kit/deleteKitById                 controllers.KitController.deleteKitById
 GET         /tmbq/admin/kit/viewKitData                   controllers.KitController.viewKitData
 

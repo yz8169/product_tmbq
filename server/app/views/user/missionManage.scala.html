@@ -64,85 +64,9 @@
 	<script>
 
 			$(function () {
-			    MissionManage.init
-
-				@*var wsUri = "@routes.MissionController.updateMissionSocket().webSocketURL()"*@
-				@*testWebSocket(wsUri);*@
+				MissionManage.init
 
 			})
-			
-			@*function updateByHand() {*@
-			@*	setInterval("updateMission()", 3000)*@
-			@*}*@
-
-			@*function updateMission() {*@
-			@*	$.ajax({*@
-			@*		url: "@routes.MissionController.getAllMission()",*@
-			@*		type: "get",*@
-			@*		dataType: "json",*@
-			@*		success: function (data) {*@
-			@*			$("#missionTable").bootstrapTable("load", data)*@
-			@*		}*@
-			@*	})*@
-			@*}*@
-
-
-
-			@*String.prototype.startWith = function (str) {*@
-
-			@*	var reg = new RegExp("^" + str);*@
-
-			@*	return reg.test(this);*@
-
-			@*}*@
-
-
-			@*function testWebSocket(wsUri) {*@
-			@*	function onOpen(evt) {*@
-			@*		doSend(JSON.stringify({*@
-			@*			info: "start"*@
-			@*		}))*@
-			@*	}*@
-
-			@*	function doSend(message) {*@
-			@*		websocket.send(message);*@
-			@*	}*@
-
-			@*	function onClose(evt) {*@
-			@*		console.log('ERROR: ' + evt.code + "," + evt.reason + "," + evt.wasClean);*@
-			@*	}*@
-
-			@*	function onMessage(evt) {*@
-			@*		var message = evt.data*@
-			@*		writeToScreen(message);*@
-
-			@*	}*@
-
-			@*	function onError(evt) {*@
-			@*	    updateByHand()*@
-			@*		console.log('ERROR: ' + evt.code + "," + evt.reason + "," + evt.wasClean);*@
-			@*	}*@
-
-			@*	function writeToScreen(message) {*@
-			@*		var data = $.parseJSON(message)*@
-			@*		$('#missionTable').bootstrapTable("load", data);*@
-			@*	}*@
-
-			@*	var websocket = new WebSocket(wsUri);*@
-			@*	websocket.onopen = function (evt) {*@
-			@*		onOpen(evt)*@
-			@*	};*@
-			@*	websocket.onclose = function (evt) {*@
-			@*		onClose(evt)*@
-			@*	};*@
-			@*	websocket.onmessage = function (evt) {*@
-			@*		onMessage(evt)*@
-			@*	};*@
-			@*	websocket.onerror = function (evt) {*@
-			@*		onError(evt)*@
-			@*	};*@
-			@*}*@
-
 
 
 	</script>

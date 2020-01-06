@@ -16,10 +16,13 @@ class KitDao @Inject()(protected val dbConfigProvider: DatabaseConfigProvider) e
 
   import profile.api._
 
-  def selectAll= db.run(Kit.result)
+  def selectAll = db.run(Kit.result)
 
   def selectByName(name: String) = db.run(Kit.
     filter(_.name === name).result.headOption)
+
+  def selectByNameSome(name: String) = db.run(Kit.
+    filter(_.name === name).result.head)
 
   def insert(row: KitRow): Future[Unit] = db.run(Kit += row).map(_ => ())
 

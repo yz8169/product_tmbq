@@ -41,7 +41,8 @@ class MissionController @Inject()(cc: ControllerComponents, formTool: FormTool, 
                                   missionDao: MissionDao)(implicit val system: ActorSystem,
                                                           implicit val materializer: Materializer,
                                                           implicit val configDao: ConfigDao,
-                                                          implicit val modeDao: ModeDao) extends AbstractController(cc) {
+                                                          implicit val modeDao: ModeDao,
+                                                          implicit val kitDao: KitDao) extends AbstractController(cc) {
 
   implicit val dao = MyDao(missionDao, configDao)
 
@@ -85,18 +86,34 @@ class MissionController @Inject()(cc: ControllerComponents, formTool: FormTool, 
 
   def newMission = Action.async(parse.multipartFormData) { implicit request =>
     val threadNum = Tool.getMissionDefaultThreadNum
-    val data = formTool.missionNameForm.bindFromRequest().get
+    val data = formTool.missionForm.bindFromRequest().get
     val userId = Tool.getUserId
     val tmpDir = Tool.createTempDirectory("tmpDir")
     val myTmpDir = Tool.getDataDir(tmpDir)
-    val myMessage = FileTool.fileCheck(myTmpDir)
+
+    val kitFile = Tool.getKitFile(data.kitId)
+    val dbCompounds = kitFile.xlsxLines().toLowerCase.selectOneColumn("compound").toSet
+
+    val myMessage = FileTool.fileCheck(myTmpDir, dbCompounds, data.rtCorrect)
     if (myMessage.valid) {
       val row = MissionRow(0, s"${data.missionName}", userId, new DateTime(), None, "preparing", threadNum)
       missionDao.insert(row).flatMap(_ => missionDao.selectByMissionName(userId, row.missionName)).flatMap { mission =>
         val outDir = Tool.getUserMissionDir
         val missionDir = MissionUtils.getMissionDir(mission.id, outDir)
         val (workspaceDir, resultDir) = (missionDir.workspaceDir, missionDir.resultDir)
-        FileUtils.copyDirectory(myTmpDir.tmpDir, workspaceDir)
+
+        myTmpDir.sampleConfigExcelFile.copyTo(Tool.getSampleConfigFile(workspaceDir))
+        myTmpDir.compoundConfigFile.copyTo(Tool.getSimpleCompoundFile(workspaceDir))
+        myTmpDir.dataFile.copyTo(Tool.getDataFile(workspaceDir))
+        myTmpDir.tmpDataDir.dirCopyToDir(workspaceDir)
+
+        val originalDataDir = new File(resultDir.getParent, "data").createDirectoryWhenNoExist
+        myTmpDir.sampleConfigExcelFile.fileCopyToDir(originalDataDir)
+        myTmpDir.compoundConfigFile.fileCopyToDir(originalDataDir)
+        myTmpDir.dataFile.fileCopyToDir(originalDataDir)
+
+        kitFile.copyTo(new File(workspaceDir, "db_compound.xlsx"))
+        val configFile = Tool.produceConfigFile(data.rtCorrect, workspaceDir)
         Tool.deleteDirectory(myTmpDir.tmpDir)
         val newMission = mission.copy(state = "wait")
         missionDao.update(newMission).map { x =>
@@ -206,8 +223,6 @@ class MissionController @Inject()(cc: ControllerComponents, formTool: FormTool, 
           Redirect(routes.MissionController.getAllMission())
       }
   }
-
-
 
 
 }

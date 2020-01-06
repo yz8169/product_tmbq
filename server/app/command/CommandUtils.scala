@@ -15,13 +15,11 @@ import utils.Utils
 object CommandUtils {
 
   def callLinuxScript(tmpDir: File, shBuffer: List[String], shPrefix: String = "") = {
-    val execCommand = new ExecCommand
     val runFile = new File(tmpDir, s"${shPrefix}run.sh")
     FileUtils.writeLines(runFile, shBuffer.asJava)
     val dos2Unix = s"${("dos2unix").wsl} ${runFile.unixPath} "
     val shCommand = s"${("sh").wsl} ${runFile.unixPath}"
-    execCommand.exec(dos2Unix, shCommand, tmpDir)
-    execCommand
+    ExecCommand().exec(dos2Unix, shCommand, tmpDir)
   }
 
   def killPid(pidDir: File) = {
