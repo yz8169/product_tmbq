@@ -28,6 +28,11 @@ class UserController @Inject()(cc: ControllerComponents, formTool: FormTool, use
     Ok(views.html.user.changePassword())
   }
 
+  def toManualBefore = Action { implicit request =>
+    println("")
+    Ok(views.html.user.manual())
+  }
+
   def changePassword = Action.async { implicit request =>
     val data = formTool.changePasswordForm.bindFromRequest().get
     val name = request.session.get("user").get

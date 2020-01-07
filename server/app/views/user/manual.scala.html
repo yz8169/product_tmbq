@@ -1,0 +1,277 @@
+@()(implicit request: RequestHeader)
+@main("使用说明")("manual") {
+	<link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/faq.min.css")">
+
+	<style>
+			.icon2x {
+				width: 24px;
+				font-size: 20px;
+				min-width: 24px;
+				display: inline-block;
+			}
+
+			ul li {
+				list-style: disc ;
+			}
+
+			.page-bar {
+				padding: 0px;
+				background-color: #f7f7f7;
+				margin-bottom: 15px;
+			}
+
+			.myImg {
+				max-width: 100%;
+				margin-bottom: 10px;
+				margin-top: 10px;
+			}
+
+			body {
+				font-size: 14px;
+			}
+
+			.panel .panel-body {
+				font-size: 14px;
+			}
+
+	</style>
+
+
+	<div class="page-content">
+
+		<div class="page-bar">
+			<ul class="page-breadcrumb">
+				<li>
+					<i class="fa fa fa-book"></i>
+					<a href="">使用说明</a>
+				</li>
+			</ul>
+		</div>
+
+
+		<div class="row-fluid">
+			<div class="row">
+				<div class="col-md-12 col-sm-12">
+					<div class="faq-page faq-content-1">
+						<div class="faq-content-container">
+							<div class="row">
+								<div class="col-md-12">
+									<div class="faq-section ">
+										<div class="panel-group  faq-content" id="accordion1">
+											<div class="panel panel-default">
+												<div class="panel-heading">
+													<h4 class="panel-title">
+														<a class=" " data-toggle="collapse" href="#collapse_1" >
+															1. 简介
+														</a>
+													</h4>
+												</div>
+												<div id="collapse_1" class="panel-collapse collapse in" >
+													<div class="panel-body">
+														<p>
+															在靶向代谢组学研究中，大规模的代谢物定量仍然是个挑战。TMBQ（Targeted Metabolome Batch Quantification）是一个高通量的定制化的靶向代谢物定量平台。本平台包含6个主要模块：原始数据预处理（raw data preprocess）、峰识别（peak identification）、标准曲线拟合（standard curve fitting）、浓度计算（concentration calculation）、单位换算（unit conversion）和关键参数优化（key parameter optimization）。目前TMBQ仅支持以Waters或Agilent的UPLC/TQ-MS设备产生的靶向代谢物组数据。未来，更多供应商的数据格式也会得到支持。
+													</div>
+												</div>
+											</div>
+											<div class="panel panel-default">
+												<div class="panel-heading">
+													<h4 class="panel-title">
+														<a class=" " data-toggle="collapse" href="#collapse_2" >
+															2. 工作流程和主要特点
+														</a>
+													</h4>
+												</div>
+												<div id="collapse_2" class="panel-collapse collapse in" >
+													<div class="panel-body">
+														<p>
+															<img class="myImg" src="@routes.Assets.at("images/work_flow.png")" style="width: 90%">
+															<br>
+													<ul>
+														<li>
+															完成原始LC / MS数据与浓度矩阵之间的连接；
+														</li>
+														<li>
+															采用自主研发的动态递归拟合（Dynamic and Recursive Calibration）算法，全面考虑了样品浓度范围，拟合优度和最佳梯度点组合；
+														</li>
+														<li>
+															峰识别和峰强度积分的参数相互独立，更加准确且真实；
+														</li>
+														<li>
+															输入简单，只需要数据文件（zip.）和2个配置文件；
+														</li>
+														<li>
+															结果与许多下游应用程序完全兼容；
+														</li>
+														<li>
+															支持来自Agilent和Waters的UPLC-TQ / MS仪器的原始数据（需要通过Proteowizard进行格式转换）；
+														</li>
+														<li>
+															可半自动化的确定关键参数；
+														</li>
+														<li>
+															提供多种单位转化功能；
+														</li>
+														<li>
+															高速的多线程运算（100多个样品，300多个代谢物只需要5分钟）；
+														</li>
+
+													</ul>
+														</p>
+													</div>
+												</div>
+											</div>
+											<div class="panel panel-default">
+												<div class="panel-heading">
+													<h4 class="panel-title">
+														<a class=" " data-toggle="collapse" href="#collapse_3" >
+															3. 输入文件的准备
+														</a>
+													</h4>
+												</div>
+												<div id="collapse_3" class="panel-collapse collapse in" >
+													<div class="panel-body">
+														<p>TMBQ需要导入以下文件：
+															<br>
+													<ul>
+														<li>
+															样本列表（.xls格式），
+														</li>
+														<li>
+															保留时间列表（.xls格式），
+														</li>
+														<li>
+															原始数据文件（.zip格式）。
+														</li>
+													</ul>
+														</p>
+														<p class="paragraph ">
+															3.1 样本列表
+														</p>
+														<p>
+															样本列表包含样本的批次信息（1,2,…），原始数据文件名，样本类型（标品或分析物）和标品浓度。至少需要1个浓度梯度（如Conc A），也允许一个以上的浓度梯度（最多50个）。每一个批次至少需要2个标准样品和1个分析样品。
+															<br>
+															<img src="@routes.Assets.at("images/simple_config.png")" style="width: 80%">
+															<br>
+														</p>
+														<p class="paragraph ">
+															3.2 保留时间列表
+														</p>
+														<p>
+															保留时间列表包含待定量的代谢物编号以及保留时间。
+														</p>
+														<p class="paragraph ">
+															3.3 原始数据文件
+														</p>
+														<p class="paragraph ">
+															3.3.1 数据格式转换
+														</p>
+														<p>
+															使用ProteoWizard（版本3.0.6150，<a href="http://proteowizard.sourceforge.net/" target="_blank">
+															http://proteowizard.sourceforge.net/</a>
+															）将原始数据文件（例如Water .raw或Agilent .d文件）转换为.txt格式。按照以下设置进行转换:
+															<br>
+															<img class="myImg" src="@routes.Assets.at("images/ms_convert.png")" style="width: 80%">
+															<br>
+															<img class="myImg" src="@routes.Assets.at("images/con_pro.png")" style="width: 80%">
+															<br>Waters .raw文件的转换也可以通过Waters公司提供的工具“ Data bridge”完成:
+															<br>打开DataBridge软件，点击“Select”选择要转换的原始数据。
+															<img class="myImg" src="@routes.Assets.at("images/data_bridge.png")" style="width: 80%">
+															<br>点击“Options”选择源文件格式（MassLynx）以及目标文件格式“ASCII”。
+															<br>
+															<img class="myImg" src="@routes.Assets.at("images/data_save.png")" style="width: 80%">
+															<br>
+															再点击“Directory”选择数据保存的地址。
+															<br><img class="myImg" src="@routes.Assets.at("images/save_address.png")" style="width: 80%">
+															<br>最后点击“Convert”即可。
+														</p>
+													</div>
+												</div>
+											</div>
+
+											<div class="panel panel-default">
+												<div class="panel-heading">
+													<h4 class="panel-title">
+														<a class=" " data-toggle="collapse" href="#collapse_4" >
+															4. TMBQ 的网页服务器的使用
+														</a>
+													</h4>
+												</div>
+												<div id="collapse_4" class="panel-collapse collapse in" >
+													<div class="panel-body">
+														<p class="paragraph ">
+															4.1 注册
+														</p>
+														<p>
+															第一次使用网页服务器需要注册。需提供用户名、密码和一个有效的网页邮箱地址。项目完成通知将通过电子邮件将发送到在此处提供的邮箱中。用户需要再次登录下载结果。
+															<br>
+															目前支持常用的网页浏览器，如IE、Chrome、Edge和火狐。
+														</p>
+														<p class="paragraph ">
+															4.2 文件上传
+														</p>
+														<p>
+															<img src="@routes.Assets.at("images/file_upload.png")" style="width: 80%">
+														</p>
+													</div>
+												</div>
+											</div>
+
+											<div class="panel panel-default">
+												<div class="panel-heading">
+													<h4 class="panel-title">
+														<a class=" " data-toggle="collapse" href="#collapse_5" >
+															5. 分析结果的说明
+														</a>
+													</h4>
+												</div>
+												<div id="collapse_5" class="panel-collapse collapse in" >
+													<div class="panel-body">
+														<p>
+															分析结果包含2个文件夹和2个.xls文件，分别命名为“ plot_peaks”，“ plot_regress”，“ concentration.xls”和“ intensity.xls”。名为“ concentration.xls”的文件包含1）每个样品中每种化合物的浓度，2）所有用户定义的参数，3）R平方和校准曲线的公式，以及4）一些简单的统计结果（均值，SD， RSD％等）。 样品浓度的可靠性用彩色表示。 结果示例如下：
+															<br>
+															<img class="myImg" src="@routes.Assets.at("images/intensity.png")" style="width: 80%">
+															<br>
+															命名为“intensity.xls”的文件包含每个样品每个化合物的强度。示例如下：
+															<br>
+															<img class="myImg" src="@routes.Assets.at("images/intensity_1.png")" style="width: 80%">
+															<br>
+															每个化合物的峰都保存在绘图文件夹中，一个化合物一个文件。以样品“ sample01”中的肌氨酸化合物为例。以下分别是目标化合物的原始信号（通过相应的功能和离子对提取），通过用户定义的参数进行平滑处理后的信号，以及用于强度计算的信号（积分区域为蓝色）。基本信息和一些关键参数将显示在图中，每个红点表示检测的扫描点。在中间图（用于峰提取的经过平滑处理的信号）中，蓝色的点划线是用户定义的RT窗口，红色的实线表示目标峰的上升点和终点，黑色的实线表示峰的顶点。
+															<br>
+															<img class="myImg" src="@routes.Assets.at("images/peak.png")" style="width: 80%">
+															<br>
+															每个批次的每个化合物的拟合曲线都保存在plot-regress文件夹中，一个化合物一个文件。以批次1中肌氨酸的校正曲线为例。以批次1中肌氨酸的校正曲线为例。有两个与校准有关的图，第一个是准备进行曲线拟合的所有点（圆）的强度-浓度折线图，点划线表示用于最终校准的点和范围，由动态递归拟合（DRC）算法确定。第二张图是所有样品的校准标准曲线（十字），两条实线表示样品的最小和最大强度，图中也展示了公式，R平方和一些参数。
+															<br>
+															<img class="myImg" src="@routes.Assets.at("images/regress_1.png")" style="width: 80%">
+															<br>
+															<img class="myImg" src="@routes.Assets.at("images/regress_2.png")" style="width: 80%">
+														</p>
+													</div>
+												</div>
+											</div>
+
+
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+
+		</div>
+
+	</div>
+
+
+	<script>
+			$(function () {
+
+
+			})
+
+
+	</script>
+
+}
