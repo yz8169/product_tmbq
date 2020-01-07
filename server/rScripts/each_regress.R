@@ -417,8 +417,9 @@ write.table(colorData, opt$coi, quote = FALSE, sep = "\t", row.names = F)
 
 regressData <- regressData %>%
   filter(!sample %in% c("index", "mz", "rtLeft", "rtRight", "peakMethod", "response", "is", "regressMethod", "origin",
-                        "fl", "iteration", "snr", "lod", "loq", "nups", "ndowns", "dfl", "lp", "rp", "mpfs", "bline", "rmode", "rmis",
-                        "rmrate", "rSquare","fc"))
+                        "fl", "iteration", "snr", "lod", "loq", "nups", "ndowns", "dfl", "lp", "rp", "mpfs", "bline",
+                        "rmode", "rmis", "rmrate", "rSquare", "fc", "compound", "std", "minPoint", "r-square", "formula",
+                        "RSD(%)", "mean", "SD"))
 
 regressData
 

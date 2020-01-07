@@ -308,10 +308,11 @@ object Tool {
   }
 
   def productCompoundFile(workspaceDir: File, tmpCompoundFile: File, dbCompoundFile: File) = {
-    println(tmpCompoundFile,dbCompoundFile)
+    println(tmpCompoundFile, dbCompoundFile)
     val tmpCompoundLines = tmpCompoundFile.xlsxLines()
     val dbCompoundLines = dbCompoundFile.xlsxLines().selectRemove("rt")
     tmpCompoundLines.leftJoin(dbCompoundLines, by = "compound").
+      reOrder(List("Index", "Compound", "Function", "Mass", "RT", "RTLW", "RTRW")).
       toXlsxFile(new File(workspaceDir, "compound_config.xlsx"))
   }
 

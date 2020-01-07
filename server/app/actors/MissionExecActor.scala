@@ -79,9 +79,6 @@ class MissionExecActor @Inject()(mission: MissionRow)(implicit val system: Actor
           if (isRtCorrect.toBoolean) {
             val compoundFile = Tool.getCompoundFile(workspaceDir)
             compoundFile.xlsxLines().toXlsxFile(compoundFile)
-            val correctLines = compoundFile.xlsxLines().selectColumns(List("compound", "rt")).rename("rt" -> "Corrected_RT")
-            val correctedFile = new File(resultDir, "Corrected_RT.xlsx")
-            tmpCompoundConfigFile.xlsxLines().leftJoin(correctLines, "compound").toXlsxFile(correctedFile)
           }
         }.parExec { b =>
           Tool.isFindPeak(workspaceDir, isIndexs, threadNum)

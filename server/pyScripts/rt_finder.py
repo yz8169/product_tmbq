@@ -12,7 +12,6 @@ import sys
 reload(sys)
 sys.setdefaultencoding('utf8')
 
-
 class GetIntensity(object):
     def __init__(self, ms_file=None):
         self.ms_file = ms_file

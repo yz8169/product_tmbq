@@ -291,7 +291,7 @@ for (compoundName in compoundNameData$CompoundName) {
       noiseStr <- signif(median, 3)
 
       plot2 = plot(data$SEC, correctValue, col = "red", cex = 0.5, xlab = "RT(m)",
-                   main = paste("peak picking | ", "    noise: ", noiseStr, sep = ""), ylab = "Intensity",
+                   main = paste("peak picking", sep = ""), ylab = "Intensity",
                    xaxt = "n")
       at <- seq(from = myRound(min(data$SEC)), to = myRound(max(data$SEC)), by = 0.5)
       axis(side = 1, at = at)

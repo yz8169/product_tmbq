@@ -80,6 +80,17 @@ trait CSVTool {
       }
     }
 
+    def reOrder(headers: List[String]) = {
+      val newHeaders = headers ::: lines.head.filter(x => !headers.contains(x))
+      val otherLines = lines.lineSeqMap.map { map =>
+        val newKeys = newHeaders.toLowerCase
+        newKeys.map { header =>
+          map(header)
+        }
+      }
+      newHeaders :: otherLines
+    }
+
     def selectRemove(variableName: String) = {
       val index = lines.head.toLowerCase.indexOf(variableName.toLowerCase())
       lines.map { columns =>
