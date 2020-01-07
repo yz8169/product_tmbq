@@ -43,6 +43,10 @@ class AppController @Inject()(cc: ControllerComponents, formTool: FormTool, acco
         controllers.routes.javascript.AdminController.getUserById,
         controllers.routes.javascript.AdminController.updateUser,
 
+        controllers.routes.javascript.ConfigController.getThreadNum,
+        controllers.routes.javascript.ConfigController.getCpuNum,
+        controllers.routes.javascript.ConfigController.updateThreadNum,
+
         controllers.routes.javascript.KitController.kitNameCheck,
         controllers.routes.javascript.KitController.addKit,
         controllers.routes.javascript.KitController.getAllKit,
@@ -59,7 +63,6 @@ class AppController @Inject()(cc: ControllerComponents, formTool: FormTool, acco
         controllers.routes.javascript.MissionController.getLogContent,
         controllers.routes.javascript.MissionController.deleteMissionById,
         controllers.routes.javascript.MissionController.updateMissionSocket,
-
 
 
       )

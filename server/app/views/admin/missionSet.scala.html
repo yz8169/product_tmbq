@@ -1,0 +1,108 @@
+@()(implicit request: RequestHeader)
+@admin.main("任务设置-TMBQ")("missionSet") {
+	<div class="page-content">
+
+		<div class="page-bar">
+			<ul class="page-breadcrumb">
+				<li>
+					<i class="fa fa fa-wrench"></i>
+					<a href="">任务设置</a>
+				</li>
+			</ul>
+		</div>
+
+		<div class="row-fluid">
+			<div class="row">
+				<div class="col-md-12 col-sm-12">
+					<div class="portlet blue-madison box">
+						<div class="portlet-title">
+							<div class="caption">
+								任务设置
+							</div>
+						</div>
+
+						<div class="portlet-body">
+
+							<div class="portlet-body form">
+								<form id="form" class=" form-horizontal" accept-charset="UTF-8"
+								action="" autocomplete="off" method="post" style="margin-top: 30px;">
+
+									<div class="form-group">
+										<label class="control-label col-sm-2">每个任务使用线程数:</label>
+										<div class="col-sm-3">
+											<p class="form-control-static">
+												<span id="threadNum"></span>
+
+													&nbsp; <a onclick="MissionSet.updateBefore">点击修改</a>
+											</p>
+										</div>
+									</div>
+
+								</form>
+							</div>
+
+
+						</div>
+					</div>
+				</div>
+			</div>
+
+		</div>
+
+	</div>
+
+	<div id="updateModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+		<div class="modal-dialog" style="width: 800px">
+			<div class="modal-content">
+				<div class="modal-header bg-primary">
+					<button type="button" class="close" data-dismiss="modal" aria-hidden="true" onclick="cancel()"></button>
+					<h4 class="modal-title">
+						<i class="fa fa-pencil"></i>
+						<span id="lblAddTitle" style="font-weight: bold">修改任务设置</span>
+					</h4>
+				</div>
+				<form class="form-horizontal" id="updateForm"
+				data-toggle="validator" method="post" target="_blank">
+					<div class="modal-body">
+						<div class="row-fluid">
+							<input class="form-control" name="missionId" type="hidden"/>
+							<div class="form-group">
+								<label class="control-label col-sm-3">原每个任务线程数:</label>
+								<div class="col-sm-6">
+									<input class="form-control" name="originalThreadNum" readonly/>
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="control-label col-sm-3">新每个任务线程数:</label>
+								<div class="col-sm-6">
+									<input class="form-control" name="threadNum"/>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="modal-footer bg-info">
+						<input type="hidden" id="id" name="id"/>
+						<button type="button" class="btn blue" onclick="MissionSet.update">
+							确定
+						</button>
+						<button type="button" class="btn green" data-dismiss="modal" onclick="cancel()">
+							取消
+						</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+	</div>
+
+
+	<script>
+			$(function () {
+				MissionSet.init
+
+			})
+
+	</script>
+
+
+}

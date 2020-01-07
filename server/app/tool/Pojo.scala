@@ -83,6 +83,8 @@ object Pojo {
 
   case class MissionData(missionName: String, kitId: Int, rtCorrect: Boolean)
 
+  case class MissionSetData(threadNum: String)
+
   case class StdData(std7File: File, std8File: File, compoundFile: File,outFile:File)
 
   case class MyDao(missionDao: MissionDao, configDao: ConfigDao)

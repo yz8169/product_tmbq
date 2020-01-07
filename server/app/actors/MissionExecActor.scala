@@ -55,7 +55,9 @@ class MissionExecActor @Inject()(mission: MissionRow)(implicit val system: Actor
         val tmpCompoundConfigFile = Tool.getSimpleCompoundFile(workspaceDir)
         val dbCompoundConfigFile = new File(workspaceDir, "db_compound.xlsx")
         val compoundConfigFile = Tool.productCompoundFile(workspaceDir, tmpCompoundConfigFile, dbCompoundConfigFile)
-        Tool.productDtaFiles(workspaceDir, compoundConfigFile, dataDir, threadNum)
+        if (!(new File(workspaceDir, "dta").exists())) {
+          Tool.productDtaFiles(workspaceDir, compoundConfigFile, dataDir, threadNum)
+        }
 
         val rBaseFile = new File(Tool.rPath, "base.R")
         FileUtils.copyFileToDirectory(rBaseFile, workspaceDir)
