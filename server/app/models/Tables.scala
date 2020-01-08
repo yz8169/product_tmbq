@@ -16,7 +16,7 @@ trait Tables {
   import slick.jdbc.{GetResult => GR}
 
   /** DDL for all tables. Call .create to execute. */
-  lazy val schema: profile.SchemaDescription = Array(Account.schema, AdjustMission.schema, Config.schema, Kit.schema, Mission.schema, Mode.schema, User.schema).reduceLeft(_ ++ _)
+  lazy val schema: profile.SchemaDescription = Array(Account.schema, AdjustMission.schema, Config.schema, Kit.schema, Mission.schema, Mode.schema, RtMission.schema, User.schema).reduceLeft(_ ++ _)
   @deprecated("Use .schema instead of .ddl", "3.0")
   def ddl = schema
 
@@ -199,6 +199,41 @@ trait Tables {
   }
   /** Collection-like TableQuery object for table Mode */
   lazy val Mode = new TableQuery(tag => new Mode(tag))
+
+  /** Entity class storing rows of table RtMission
+   *  @param id Database column id SqlType(INT), AutoInc, PrimaryKey
+   *  @param missionName Database column mission_name SqlType(VARCHAR), Length(255,true)
+   *  @param userId Database column user_id SqlType(INT)
+   *  @param startTime Database column start_time SqlType(DATETIME)
+   *  @param endTime Database column end_time SqlType(DATETIME), Default(None)
+   *  @param state Database column state SqlType(VARCHAR), Length(255,true) */
+  case class RtMissionRow(id: Int, missionName: String, userId: Int, startTime: DateTime, endTime: Option[DateTime] = None, state: String)
+  /** GetResult implicit for fetching RtMissionRow objects using plain SQL queries */
+  implicit def GetResultRtMissionRow(implicit e0: GR[Int], e1: GR[String], e2: GR[DateTime], e3: GR[Option[DateTime]]): GR[RtMissionRow] = GR{
+    prs => import prs._
+    RtMissionRow.tupled((<<[Int], <<[String], <<[Int], <<[DateTime], <<?[DateTime], <<[String]))
+  }
+  /** Table description of table rt_mission. Objects of this class serve as prototypes for rows in queries. */
+  class RtMission(_tableTag: Tag) extends profile.api.Table[RtMissionRow](_tableTag, Some("product_tmbq"), "rt_mission") {
+    def * = (id, missionName, userId, startTime, endTime, state) <> (RtMissionRow.tupled, RtMissionRow.unapply)
+    /** Maps whole row to an option. Useful for outer joins. */
+    def ? = ((Rep.Some(id), Rep.Some(missionName), Rep.Some(userId), Rep.Some(startTime), endTime, Rep.Some(state))).shaped.<>({r=>import r._; _1.map(_=> RtMissionRow.tupled((_1.get, _2.get, _3.get, _4.get, _5, _6.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+
+    /** Database column id SqlType(INT), AutoInc, PrimaryKey */
+    val id: Rep[Int] = column[Int]("id", O.AutoInc, O.PrimaryKey)
+    /** Database column mission_name SqlType(VARCHAR), Length(255,true) */
+    val missionName: Rep[String] = column[String]("mission_name", O.Length(255,varying=true))
+    /** Database column user_id SqlType(INT) */
+    val userId: Rep[Int] = column[Int]("user_id")
+    /** Database column start_time SqlType(DATETIME) */
+    val startTime: Rep[DateTime] = column[DateTime]("start_time")
+    /** Database column end_time SqlType(DATETIME), Default(None) */
+    val endTime: Rep[Option[DateTime]] = column[Option[DateTime]]("end_time", O.Default(None))
+    /** Database column state SqlType(VARCHAR), Length(255,true) */
+    val state: Rep[String] = column[String]("state", O.Length(255,varying=true))
+  }
+  /** Collection-like TableQuery object for table RtMission */
+  lazy val RtMission = new TableQuery(tag => new RtMission(tag))
 
   /** Entity class storing rows of table User
    *  @param id Database column id SqlType(INT), AutoInc, PrimaryKey

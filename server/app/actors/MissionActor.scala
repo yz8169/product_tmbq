@@ -29,5 +29,10 @@ class MissionActor @Inject()()(implicit val system: ActorSystem,
       )
       missionManageActor ! "ask"
 
+      val rtMissionManageActor = system.actorOf(
+        Props(new RtMissionManageActor())
+      )
+      rtMissionManageActor ! "ask"
+
   }
 }

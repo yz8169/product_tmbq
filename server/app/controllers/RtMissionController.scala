@@ -1,57 +1,50 @@
 package controllers
 
 import java.io.File
-import java.net.URLEncoder
 
-import actors.MissionActor
+import actors.{MissionActor, RtMissionManageActor}
 import akka.actor.{Actor, ActorSystem, PoisonPill, Props}
 import akka.stream.Materializer
 import dao._
+import implicits.Implicits._
 import javax.inject.Inject
-import org.apache.commons.io.FileUtils
-import org.apache.commons.lang3.StringUtils
-import play.api.libs.json.{JsValue, Json}
-import play.api.mvc.{AbstractController, ControllerComponents, WebSocket}
-import tool.{FileTool, FormTool, Tool, WebTool}
-
-import scala.collection.JavaConverters._
+import mission.MissionUtils
 import models.Tables._
+import org.apache.commons.io.FileUtils
 import org.joda.time.DateTime
 import org.zeroturnaround.zip.ZipUtil
+import play.api.libs.json.{JsValue, Json}
 import play.api.libs.streams.ActorFlow
-
-import scala.concurrent.duration._
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
-import scala.util.{Failure, Success}
-import scala.collection.parallel.ForkJoinTaskSupport
-import implicits.Implicits._
-import mission.MissionUtils
+import play.api.mvc.{AbstractController, ControllerComponents, WebSocket}
 import tool.Pojo.MyDao
+import tool.{FileTool, FormTool, Tool, WebTool}
 import utils.Utils
 
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+import scala.concurrent.duration._
 import scala.language.postfixOps
 
 
 /**
  * Created by yz on 2018/9/18
  */
-class MissionController @Inject()(cc: ControllerComponents, formTool: FormTool, userDao: UserDao,
-                                  accountDao: AccountDao, rtMissionDao: RtMissionDao,
-                                  missionDao: MissionDao)(implicit val system: ActorSystem,
-                                                          implicit val materializer: Materializer,
-                                                          implicit val configDao: ConfigDao,
-                                                          implicit val modeDao: ModeDao,
-                                                          implicit val kitDao: KitDao) extends AbstractController(cc) {
+class RtMissionController @Inject()(cc: ControllerComponents, formTool: FormTool, userDao: UserDao,
+                                    accountDao: AccountDao,
+                                    rtMissionDao: RtMissionDao)(implicit val system: ActorSystem,
+                                                                implicit val materializer: Materializer,
+                                                                implicit val configDao: ConfigDao,
+                                                                implicit val modeDao: ModeDao,
+                                                                implicit val kitDao: KitDao) extends AbstractController(cc) {
 
-  implicit val dao = MyDao(missionDao, configDao, rtMissionDao)
 
-  import tool.MissionTool._
+  val missionDao = rtMissionDao
 
-  val missionActor = system.actorOf(
-    Props(new MissionActor())
-  )
-  missionActor ! "start"
+  import tool.RtMissionTool._
+
+  def missionManageBefore = Action { implicit request =>
+    Ok(views.html.user.rtMissionManage())
+  }
 
   def getAllMission = Action.async { implicit request =>
     val userId = Tool.getUserId
@@ -69,9 +62,9 @@ class MissionController @Inject()(cc: ControllerComponents, formTool: FormTool, 
     }
   }
 
-  def newMissionBefore = Action { implicit request =>
+  def rtCorrectBefore = Action { implicit request =>
     val missionName = s"project_${Tool.generateMissionName}"
-    Ok(views.html.user.newMission(missionName))
+    Ok(views.html.user.rtCorrect(missionName))
   }
 
   def missionNameCheck = Action.async { implicit request =>
@@ -86,39 +79,36 @@ class MissionController @Inject()(cc: ControllerComponents, formTool: FormTool, 
     }
   }
 
-  def newMission = Action.async(parse.multipartFormData) { implicit request =>
-    val threadNum = Tool.getMissionDefaultThreadNum
-    val data = formTool.missionForm.bindFromRequest().get
+  def rtCorrect = Action.async(parse.multipartFormData) { implicit request =>
+    val data = formTool.rtCorrectForm.bindFromRequest().get
     val userId = Tool.getUserId
     val tmpDir = Tool.createTempDirectory("tmpDir")
-    val myTmpDir = Tool.getDataDir(tmpDir)
+    val myTmpDir = Tool.getRtCorrectDataDir(tmpDir)
 
     val kitFile = Tool.getKitFile(data.kitId)
     val dbCompounds = kitFile.xlsxLines().toLowerCase.selectOneColumn("compound").toSet
 
-    val myMessage = FileTool.fileCheck(myTmpDir, dbCompounds, data.rtCorrect)
+    val myMessage = FileTool.rtCorrectFileCheck(myTmpDir, dbCompounds)
     if (myMessage.valid) {
-      val row = MissionRow(0, s"${data.missionName}", userId, new DateTime(), None, "preparing", threadNum)
-      missionDao.insert(row).flatMap(_ => missionDao.selectByMissionName(userId, row.missionName)).flatMap { mission =>
+      val row = RtMissionRow(0, s"${data.missionName}", userId, new DateTime(), None, "preparing")
+      rtMissionDao.insert(row).flatMap(_ => rtMissionDao.selectByMissionName(userId, row.missionName)).flatMap { mission =>
         val outDir = getUserMissionDir()
         val missionDir = MissionUtils.getMissionDir(mission.id, outDir)
         val (workspaceDir, resultDir) = (missionDir.workspaceDir, missionDir.resultDir)
 
-        myTmpDir.sampleConfigExcelFile.copyTo(Tool.getSampleConfigFile(workspaceDir))
-        myTmpDir.compoundConfigFile.copyTo(Tool.getSimpleCompoundFile(workspaceDir))
-        myTmpDir.dataFile.copyTo(Tool.getDataFile(workspaceDir))
-        myTmpDir.tmpDataDir.dirCopyToDir(workspaceDir)
+        myTmpDir.std7File.copyTo(Tool.getStd7File(workspaceDir))
+        myTmpDir.std8File.copyTo(Tool.getStd8File(workspaceDir))
+        myTmpDir.compoundFile.copyTo(Tool.getSimpleCompoundFile(workspaceDir))
 
         val originalDataDir = new File(resultDir.getParent, "data").createDirectoryWhenNoExist
-        myTmpDir.sampleConfigExcelFile.fileCopyToDir(originalDataDir)
-        myTmpDir.compoundConfigFile.fileCopyToDir(originalDataDir)
-        myTmpDir.dataFile.fileCopyToDir(originalDataDir)
+        myTmpDir.std7File.fileCopyToDir(originalDataDir)
+        myTmpDir.std8File.fileCopyToDir(originalDataDir)
+        myTmpDir.compoundFile.fileCopyToDir(originalDataDir)
 
         kitFile.copyTo(new File(workspaceDir, "db_compound.xlsx"))
-        val configFile = Tool.produceConfigFile(data.rtCorrect, workspaceDir)
         Tool.deleteDirectory(myTmpDir.tmpDir)
         val newMission = mission.copy(state = "wait")
-        missionDao.update(newMission).map { x =>
+        rtMissionDao.update(newMission).map { x =>
           Ok(Json.obj("valid" -> true))
         }
       }
@@ -131,7 +121,7 @@ class MissionController @Inject()(cc: ControllerComponents, formTool: FormTool, 
   def updateMissionSocket = WebSocket.accept[JsValue, JsValue] {
     implicit request =>
       val userId = Tool.getUserId
-      case class MissionAction(beforeMissions: Seq[MissionRow], action: String)
+      case class MissionAction(beforeMissions: Seq[RtMissionRow], action: String)
       ActorFlow.actorRef(out => Props(new Actor {
         override def receive: Receive = {
           case msg: JsValue if (msg \ "info").as[String] == "start" =>
@@ -175,10 +165,10 @@ class MissionController @Inject()(cc: ControllerComponents, formTool: FormTool, 
         mission =>
           val missionIdDir = getMissionIdDirById(missionId)
           val resultDir = new File(missionIdDir, "result")
-          val resultFile = new File(missionIdDir, s"result.zip")
+          val resultFile = new File(resultDir, s"RT_Corrected.xlsx")
           if (!resultFile.exists()) ZipUtil.pack(resultDir, resultFile)
           Ok.sendFile(resultFile).withHeaders(
-            CONTENT_DISPOSITION -> Tool.getContentDisposition(s"${mission.missionName}_result.zip"),
+            CONTENT_DISPOSITION -> Tool.getContentDisposition(s"${mission.missionName}_rt_corrected.xlsx"),
             CONTENT_TYPE -> "application/x-download"
           )
       }
@@ -208,7 +198,7 @@ class MissionController @Inject()(cc: ControllerComponents, formTool: FormTool, 
       val data = formTool.missionIdForm.bindFromRequest().get
       missionDao.selectByMissionId(userId, data.missionId).map {
         mission =>
-          val missionIdDir = getMissionIdDirById(data.missionId)
+          val missionIdDir = getMissionIdDir(mission)
           val logFile = new File(missionIdDir, s"log.txt")
           val logStr = FileUtils.readFileToString(logFile, "UTF-8")
           Ok(Json.toJson(logStr))
@@ -222,7 +212,7 @@ class MissionController @Inject()(cc: ControllerComponents, formTool: FormTool, 
         x =>
           val missionIdDir = getMissionIdDirById(data.missionId)
           Utils.deleteDirectory(missionIdDir)
-          Redirect(routes.MissionController.getAllMission())
+          Ok(Json.toJson("success"))
       }
   }
 

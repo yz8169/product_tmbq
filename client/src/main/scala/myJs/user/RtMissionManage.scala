@@ -1,31 +1,28 @@
 package myJs.user
 
+import myJs.Tool
 import myJs.Utils._
-import org.scalajs.dom.{Element, _}
-import scalatags.Text.TypedTag
-import scalatags.Text.all.{value, _}
-import scalatags.Text._
-
-import scala.scalajs.js
-import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
-import myJs.Tool.{layerOptions, myElement}
-import myJs.myPkg.{LayerOptions, Swal, SwalOptions}
 import myJs.myPkg.Implicits._
 import myJs.myPkg.jquery._
-import myJs.myPkg.bootstrap._
-import myJs.myPkg.bootstrap.jquery.JQueryContext.imports.jQuery
+import myJs.myPkg.{LayerOptions, Swal, SwalOptions}
+import org.scalajs.dom._
+import scalatags.Text.{TypedTag, _}
+import scalatags.Text.all._
 
+import scala.scalajs.js
 import scala.scalajs.js.JSON
+import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
 
 
 /**
  * Created by yz on 2019/4/25
  */
-@JSExportTopLevel("MissionManage")
-object MissionManage {
+@JSExportTopLevel("RtMissionManage")
+object RtMissionManage {
 
   @JSExport("init")
   def init = {
+
     $("#missionTable").bootstrapTable()
     refreshMission()
     updateMissionSocket
@@ -35,7 +32,7 @@ object MissionManage {
 
   @JSExport("refreshMission")
   def refreshMission(f: () => Any = () => ()) = {
-    val url = g.jsRoutes.controllers.MissionController.getAllMission().url.toString
+    val url = g.jsRoutes.controllers.RtMissionController.getAllMission().url.toString
     val ajaxSettings = JQueryAjaxSettings.url(s"${url}?").contentType("application/json").
       `type`("get").success { (data, status, e) =>
       $("#missionTable").bootstrapTable("load", data)
@@ -67,7 +64,7 @@ object MissionManage {
   }
 
   def updateMissionSocket = {
-    val url = g.jsRoutes.controllers.MissionController.updateMissionSocket().url.toString
+    val url = g.jsRoutes.controllers.RtMissionController.updateMissionSocket().url.toString
     val wsUri = s"ws://${window.location.host}${url}"
     webSocket(wsUri)
   }
@@ -102,7 +99,7 @@ object MissionManage {
       showConfirmButton(true).confirmButtonClass("btn-danger").confirmButtonText("确定").closeOnConfirm(false).
       cancelButtonText("取消").showLoaderOnConfirm(true)
     Swal.swal(options, () => {
-      val url = g.jsRoutes.controllers.MissionController.deleteMissionById().url.toString
+      val url = g.jsRoutes.controllers.RtMissionController.deleteMissionById().url.toString
       val ajaxSettings = JQueryAjaxSettings.url(s"${url}?missionId=${id}").
         `type`("get").contentType("application/json").success { (data: js.Any, status: String, e: JQueryXHR) =>
         refreshMission { () =>
@@ -120,12 +117,12 @@ object MissionManage {
   @JSExport("operateFmt")
   def operateFmt: js.Function = {
     (v: js.Any, row: js.Dictionary[js.Any]) =>
-      val downloadUrl = g.jsRoutes.controllers.MissionController.downloadResult().url.toString
+      val downloadUrl = g.jsRoutes.controllers.RtMissionController.downloadResult().url.toString
       val downloadStr = a(title := "下载结果", href := s"${downloadUrl}?missionId=${row("id")}", cursor.pointer,
         span(em(cls := "fa fa-download"))
       )
 
-      val downloadDataUrl = g.jsRoutes.controllers.MissionController.downloadData().url.toString
+      val downloadDataUrl = g.jsRoutes.controllers.RtMissionController.downloadData().url.toString
       val downloadDataStr = a(title := "下载原始数据", href := s"${downloadDataUrl}?missionId=${row("id")}", cursor.pointer,
         span(em(cls := "fa fa-cloud-download"))
       )
@@ -133,14 +130,14 @@ object MissionManage {
       val deleteStr = a(
         title := "删除",
         cursor.pointer,
-        onclick := s"MissionManage.deleteData('" + row("id") + "')",
+        onclick := s"RtMissionManage.deleteData('" + row("id") + "')",
         target := "_blank",
         span(
           em(cls := "fa fa-close")
         )
       )
 
-      val viewStr = a(title := "日志", onclick := s"MissionManage.viewLog('${row("id")}')", cursor.pointer,
+      val viewStr = a(title := "日志", onclick := s"RtMissionManage.viewLog('${row("id")}')", cursor.pointer,
         span(em(cls := "fa fa-file-text"))
       )
 
@@ -157,7 +154,7 @@ object MissionManage {
 
   @JSExport("viewLog")
   def viewLog(id: String) = {
-    val url = g.jsRoutes.controllers.MissionController.getLogContent().url.toString
+    val url = g.jsRoutes.controllers.RtMissionController.getLogContent().url.toString
     val ajaxSettings = JQueryAjaxSettings.url(s"${url}?missionId=${id}").
       `type`("get").contentType("application/json").success { (data: js.Any, status: String, e: JQueryXHR) =>
       val options = LayerOptions.`type`(1).title("<h4>运行信息</h4>").area(js.Array("900px", "600px")).

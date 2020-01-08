@@ -2,7 +2,7 @@ package tool
 
 import java.io.File
 
-import dao.{ConfigDao, MissionDao}
+import dao.{ConfigDao, MissionDao, RtMissionDao}
 import play.api.mvc.RequestHeader
 
 
@@ -75,6 +75,8 @@ object Pojo {
 
   case class MyDataDir(tmpDir: File, tmpDataDir: File, dataFile: File, sampleConfigExcelFile: File, compoundConfigFile: File)
 
+  case class RtCorrectDataDir(tmpDir: File, std7File: File, std8File: File, compoundFile: File)
+
   case class AdminMyDataDir(tmpDir: File, compoundConfigFile: File)
 
   case class DataFileInfo(sampleIds: List[String])
@@ -83,11 +85,15 @@ object Pojo {
 
   case class MissionData(missionName: String, kitId: Int, rtCorrect: Boolean)
 
+  case class KitIdData(kitId: Int)
+
+  case class RtCorrectData(missionName: String, kitId: Int)
+
   case class MissionSetData(threadNum: String)
 
   case class StdData(std7File: File, std8File: File, compoundFile: File,outFile:File)
 
-  case class MyDao(missionDao: MissionDao, configDao: ConfigDao)
+  case class MyDao(missionDao: MissionDao, configDao: ConfigDao,rtMissionDao:RtMissionDao)
 
   trait InDir {
     val dir01: File = new File(".")

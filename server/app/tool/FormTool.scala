@@ -2,7 +2,7 @@ package tool
 
 import play.api.data._
 import play.api.data.Forms._
-import tool.Pojo.{MissionData, MissionNameData, MissionSetData, UserData}
+import tool.Pojo.{KitIdData, MissionData, MissionNameData, MissionSetData, RtCorrectData, UserData}
 
 /**
  * Created by yz on 2018/7/17
@@ -63,6 +63,13 @@ class FormTool {
       "kitId" -> number,
       "rtCorrect" -> boolean,
     )(MissionData.apply)(MissionData.unapply)
+  )
+
+  val rtCorrectForm = Form(
+    mapping(
+      "missionName" -> text,
+      "kitId" -> number
+    )(RtCorrectData.apply)(RtCorrectData.unapply)
   )
 
   val missionSetForm = Form(

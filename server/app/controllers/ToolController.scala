@@ -23,7 +23,6 @@ class ToolController @Inject()(cc: ControllerComponents, formTool: FormTool) ext
       val exampleDir = Tool.exampleDir
       val resultFile = new File(exampleDir, data.fileName)
       Ok.sendFile(resultFile).withHeaders(
-        CACHE_CONTROL -> "max-age=3600",
         CONTENT_DISPOSITION -> s"attachment; filename=${
           resultFile.getName
         }",

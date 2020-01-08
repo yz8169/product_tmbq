@@ -23,7 +23,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import implicits.Implicits._
 import org.zeroturnaround.zip.ZipUtil
 import play.api.libs.Files.TemporaryFile
-import tool.Pojo.{AdminMyDataDir, CommandData, IndexData, MyDataDir, StdData}
+import tool.Pojo.{AdminMyDataDir, CommandData, IndexData, MyDataDir, RtCorrectDataDir, StdData}
 
 import scala.collection.parallel.CollectionConverters._
 import scala.jdk.CollectionConverters._
@@ -66,24 +66,12 @@ object Tool {
 
   val availCpu = Runtime.getRuntime.availableProcessors() - 1
 
-  def getMissionWorkspaceDir(mission: MissionRow) = {
-    val missionIdDir = getMissionIdDir(mission)
-    new File(missionIdDir, "workspace")
-  }
-
-  def getMissionIdDir(mission: MissionRow) = {
-    val userMissionFile = getUserMissionDir(mission.userId)
-    new File(userMissionFile, mission.id.toString)
-  }
-
-  def getMissionResultDir(mission: MissionRow) = {
-    val missionIdDir = getMissionIdDir(mission)
-    new File(missionIdDir, "result")
-  }
-
-  def getUserMissionDir(userId: Int) = {
-    val userIdDir = getUserIdDir(userId)
-    new File(userIdDir, "mission")
+  def getRtCorrectDataDir(dataDir: File)(implicit request: Request[MultipartFormData[TemporaryFile]]) = {
+    val compoundFile = WebTool.fileMoveDir("compoundConfigFile", dataDir)
+    compoundFile.removeEmptyLine
+    val std7File = WebTool.fileMoveDir("std7File", dataDir)
+    val std8File = WebTool.fileMoveDir("std8File", dataDir)
+    RtCorrectDataDir(dataDir, std7File, std8File, compoundFile)
   }
 
   def generateMissionName = {
@@ -224,27 +212,32 @@ object Tool {
     new File(workspaceDir, "sample_config.xlsx")
   }
 
+  def getStd7File(workspaceDir: File) = {
+    new File(workspaceDir, "std7.txt")
+  }
+
+  def getStd8File(workspaceDir: File) = {
+    new File(workspaceDir, "std8.txt")
+  }
+
   def getSimpleCompoundFile(workspaceDir: File) = {
     new File(workspaceDir, "simple_compound.xlsx")
   }
 
   def getStdData(workspaceDir: File) = {
     val parent = workspaceDir.getParentFile
-    val lines = Tool.getSampleConfigFile(parent).xlsxLines()
-    val batchs = lines.lineMap.map { map =>
-      (map("batch"), map("file name"))
-    }.groupMap(_._1)(_._2)
-    val fileNames = batchs.find { case (batch, fileNames) =>
-      List("std_7", "std_8").forall(x => fileNames.toLowerCase.exists(y => y.endsWith(x)))
-    }.head._2.toLowerCase
-    val std7FileName = fileNames.find(_.endsWith("std_7")).head
-    val std8FileName = fileNames.find(_.endsWith("std_8")).head
-    val std7File = new File(parent, s"data/${std7FileName}.txt")
-    val std8File = new File(parent, s"data/${std8FileName}.txt")
+    val std7File = Tool.getStd7File(parent)
+    val std8File = Tool.getStd8File(parent)
     val compoundFile = new File(workspaceDir, "correct_before_compound.xlsx")
     new File(parent, "compound_config.xlsx").copyTo(compoundFile)
     val outFile = new File(workspaceDir, "correct_after_config.xlsx")
     StdData(std7File, std8File, compoundFile, outFile)
+  }
+
+  def getLogFile(dir: File) = {
+    val file = new File(dir, "log.txt")
+    "Run successfully!".toFile(file)
+    file
   }
 
   def getConfigFile(workspaceDir: File) = {
@@ -261,20 +254,13 @@ object Tool {
 
   def rtCorrect(workspaceDir: File) = {
     val rtCorrectWorkspaceDir = new File(workspaceDir, "rtCorrect").reCreateDirectoryWhenExist
-    val configFile = getConfigFile(workspaceDir)
-    val configMap = configFile.txtLines.map { columns =>
-      (columns(0) -> columns(1))
-    }.toMap
-    val isRtCorrect = configMap("rtCorrect")
-    if (isRtCorrect == "true") {
-      val stdData = Tool.getStdData(rtCorrectWorkspaceDir)
-      val command =
-        s"""
-           |python ${new File(Tool.pyPath, "rt_finder.py").unixPath} --std7 ${stdData.std7File.unixPath} --std8 ${stdData.std8File.unixPath}   --compound ${stdData.compoundFile.unixPath} --o ${stdData.outFile.unixPath}
-           |cp ${stdData.outFile.unixPath} ${Tool.getCompoundFile(workspaceDir).unixPath}
+    val stdData = Tool.getStdData(rtCorrectWorkspaceDir)
+    val command =
+      s"""
+         |python ${new File(Tool.pyPath, "rt_finder.py").unixPath} --std7 ${stdData.std7File.unixPath} --std8 ${stdData.std8File.unixPath}   --compound ${stdData.compoundFile.unixPath} --o ${stdData.outFile.unixPath}
+         |cp ${stdData.outFile.unixPath} ${Tool.getCompoundFile(workspaceDir).unixPath}
            """.stripMargin
-      CommandData(rtCorrectWorkspaceDir, List(command))
-    } else CommandData(rtCorrectWorkspaceDir, List(""))
+    CommandData(rtCorrectWorkspaceDir, List(command))
   }
 
   def productAgilentDtaFiles(tmpDir: File, compoundConfigFile: File, dataDir: File, threadNum: Int) = {
@@ -311,7 +297,7 @@ object Tool {
     println(tmpCompoundFile, dbCompoundFile)
     val tmpCompoundLines = tmpCompoundFile.xlsxLines()
     val dbCompoundLines = dbCompoundFile.xlsxLines().selectRemove("rt")
-    tmpCompoundLines.leftJoin(dbCompoundLines, by = "compound").
+    tmpCompoundLines.selectColumns(List("compound", "rt")).leftJoin(dbCompoundLines, by = "compound").
       reOrder(List("Index", "Compound", "Function", "Mass", "RT", "RTLW", "RTRW")).
       toXlsxFile(new File(workspaceDir, "compound_config.xlsx"))
   }
@@ -344,16 +330,6 @@ object Tool {
     new File(Tool.kitDir, s"${id}.xlsx")
   }
 
-  def getUserMissionDir(implicit request: RequestHeader) = {
-    val userIdDir = getUserIdDir
-    new File(userIdDir, "mission")
-  }
-
-  def getUserAdjustMissionDir(implicit request: RequestHeader) = {
-    val userIdDir = getUserIdDir
-    new File(userIdDir, "adjust_mission")
-  }
-
   def getMissionDefaultThreadNum(implicit configDao: ConfigDao) = {
     Utils.execFuture(configDao.selectThreadNum).value.toInt
   }
@@ -367,21 +343,6 @@ object Tool {
     val tmpDataDir = new File(dataDir, "tmpData").reCreateDirectoryWhenExist
     ZipUtil.unpack(dataFile, tmpDataDir)
     MyDataDir(dataDir, tmpDataDir, dataFile, sampleConfigFile, compoundConfigFile)
-  }
-
-  def getMissionIdDirById(missionId: Int)(implicit request: RequestHeader) = {
-    val userMissionFile = getUserMissionDir
-    new File(userMissionFile, missionId.toString)
-  }
-
-  def getAdjustMissionIdDirById(missionId: Int)(implicit request: RequestHeader) = {
-    val userMissionFile = getUserAdjustMissionDir
-    new File(userMissionFile, missionId.toString)
-  }
-
-  def getWorkspaceDirById(missionId: Int)(implicit request: RequestHeader) = {
-    val missionIdDir = getMissionIdDirById(missionId)
-    new File(missionIdDir, "workspace")
   }
 
   def getYellowStyle(workbook: XSSFWorkbook) = {

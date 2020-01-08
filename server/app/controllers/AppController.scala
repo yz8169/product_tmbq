@@ -64,6 +64,16 @@ class AppController @Inject()(cc: ControllerComponents, formTool: FormTool, acco
         controllers.routes.javascript.MissionController.deleteMissionById,
         controllers.routes.javascript.MissionController.updateMissionSocket,
 
+        controllers.routes.javascript.RtMissionController.rtCorrect,
+        controllers.routes.javascript.RtMissionController.missionManageBefore,
+        controllers.routes.javascript.RtMissionController.getAllMission,
+        controllers.routes.javascript.RtMissionController.getLogContent,
+        controllers.routes.javascript.RtMissionController.deleteMissionById,
+        controllers.routes.javascript.RtMissionController.updateMissionSocket,
+        controllers.routes.javascript.RtMissionController.downloadData,
+        controllers.routes.javascript.RtMissionController.downloadResult,
+        controllers.routes.javascript.RtMissionController.missionNameCheck,
+
 
       )
     ).as("text/javascript")

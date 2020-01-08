@@ -148,4 +148,27 @@ object SimpleCompoundFileValidTool {
 
   }
 
+  def valid(lines: List[List[String]], dbCompounds: Set[String]) = {
+    val fileValidTool = new SimpleCompoundFileValidTool(lines)
+    import fileValidTool._
+    validHeadersRepeat.andThen { b =>
+      validHeadersExist
+    }.andThen { b =>
+      validHeadersExist
+    }.andThen { b =>
+      validColumnNum
+    }.andThen { b =>
+      validNonEmpty
+    }.andThen { b =>
+      validColumnsRepeat
+    }.andThen { b =>
+      validCompoundColumn
+    }.andThen { b =>
+      validCompoundColumnSame(dbCompounds)
+    }.andThen { b =>
+      validDoubleColumn
+    }
+
+  }
+
 }

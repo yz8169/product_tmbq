@@ -34,16 +34,17 @@ class MissionExecActor @Inject()(mission: MissionRow)(implicit val system: Actor
 ) extends Actor {
   val missionDao = dao.missionDao
   implicit val configDao = dao.configDao
+  import MissionTool._
 
   override def receive: Receive = {
     case "run" =>
       val missionId = mission.id
-      val workspaceDir = Tool.getMissionWorkspaceDir(mission)
-      val logFile = new File(workspaceDir.getParent, "log.txt")
+      val workspaceDir = getMissionWorkspaceDir(mission)
+      val logFile = Tool.getLogFile(workspaceDir.getParentFile)
       val newMision = mission.copy(state = "running")
       missionDao.update(newMision).map { x =>
-        val missionIdDir = Tool.getMissionIdDir(mission)
-        val resultDir = Tool.getMissionResultDir(mission)
+        val missionIdDir = getMissionIdDir(mission)
+        val resultDir = getMissionResultDir(mission)
         val tmpDataDir = new File(workspaceDir, "tmpData")
         val dataDir = new File(workspaceDir, "data").createDirectoryWhenNoExist
         val file = new File(workspaceDir, "data.zip")
@@ -68,19 +69,7 @@ class MissionExecActor @Inject()(mission: MissionRow)(implicit val system: Actor
         }
         val isIndexs = indexDatas.filter(x => x.index.startWithsIgnoreCase("is"))
 
-        val commandExec = CommandExec().exec { b =>
-          Tool.rtCorrect(workspaceDir)
-        }.map { b =>
-          val configFile = getConfigFile(workspaceDir)
-          val configMap = configFile.txtLines.map { columns =>
-            (columns(0) -> columns(1))
-          }.toMap
-          val isRtCorrect = configMap("rtCorrect")
-          if (isRtCorrect.toBoolean) {
-            val compoundFile = Tool.getCompoundFile(workspaceDir)
-            compoundFile.xlsxLines().toXlsxFile(compoundFile)
-          }
-        }.parExec { b =>
+        val commandExec = CommandExec().parExec { b =>
           Tool.isFindPeak(workspaceDir, isIndexs, threadNum)
         }.exec { b =>
           Tool.isMerge(workspaceDir, isIndexs)
