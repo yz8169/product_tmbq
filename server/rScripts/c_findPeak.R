@@ -2,6 +2,9 @@
 # Objective : TODO
 # Created by: yz
 # Created on: 2018/9/19
+
+library(tidyverse)
+
 getSub <- function(data, filterPeak, response) {
   subData = subset(data, SEC >= filterPeak$rtmin & SEC <= filterPeak$rtmax)
   if (response == "height") {
@@ -37,16 +40,14 @@ getLargestPeak <- function(filterPeak, data, compoundRow) {
   }
   firstRow
 }
+
 getNearestPeak <- function(filterPeak, compoundRow) {
-  minDif = 0
-  for (i in 1:nrow(filterPeak)) {
-    dif = abs(filterPeak[i, "rt"] - compoundRow$rt)
-    if (dif <= minDif || minDif == 0) {
-      firstRow = filterPeak[i,]
-      minDif = dif
-    }
-  }
-  firstRow
+  as_tibble(filterPeak) %>%
+    mutate(min = abs(rt - compoundRow$rt)) %>%
+    arrange(min) %>%
+    head(1) %>%
+    select(-"min") %>%
+    as.data.frame()
 }
 
 myRound <- function(value) {
@@ -255,7 +256,6 @@ for (compoundName in compoundNameData$CompoundName) {
         smoothData <- savgol(smoothData, compoundRow$fl)
       }
       if (compoundRow$bline == "no") {
-        data$INT <- slightSmoothData
         slightCorrectValue <- slightSmoothData
         correctValue <- smoothData
       }else {
@@ -263,7 +263,6 @@ for (compoundName in compoundNameData$CompoundName) {
         baseLineFrame <- t(baseLineFrame$Visits)
         slightBaseLine <- baseline(baseLineFrame, method = 'irls')
         slightCorrectValue = c(getCorrected(slightBaseLine))
-        data$INT = slightCorrectValue
 
         baseLineFrame <- data.frame(Date = data$SEC, Visits = smoothData)
         baseLineFrame <- t(baseLineFrame$Visits)
@@ -271,7 +270,17 @@ for (compoundName in compoundNameData$CompoundName) {
         correctValue = c(getCorrected(baseLine))
       }
 
-      median = getMedian(slightCorrectValue, 1000)
+      if (compoundRow$bline4pa == "no") {
+        data$INT <- slightSmoothData
+      }else {
+        baseLineFrame <- data.frame(Date = data$SEC, Visits = slightSmoothData)
+        baseLineFrame <- t(baseLineFrame$Visits)
+        slightBaseLine <- baseline(baseLineFrame, method = 'irls')
+        slightCorrectValue = c(getCorrected(slightBaseLine))
+        data$INT = slightCorrectValue
+      }
+
+      median = getMedian(correctValue, compoundRow$npt)
       std <- as.character(compoundRow$std)
       std <- tolower(std)
       index <- dealStr(compoundRow$index)

@@ -12,9 +12,9 @@ class CompoundFileValidTool(lines: List[List[String]]) {
 
   val headers = lines.head.map(_.toLowerCase)
   val hasHeaders = List("index", "compound", "function", "mass", "rt", "rtlw", "rtrw", "peak_location",
-    "response", "is_correction", "std", "polynomial_type", "origin", "ws4pp", "i4pp", "rs4rs", "mp4rs", "snr4pp",
-    "lod", "loq", "nups4pp", "ndowns4pp", "ws4pa", "lp4e", "rp4e", "mp4e", "bline", "rmode", "rmis", "rmratio")
-  val intHeaders = List("ws4pp", "i4pp", "mp4rs", "snr4pp", "nups4pp", "ndowns4pp", "lp4e", "rp4e", "mp4e",
+    "response", "is_correction", "std", "polynomial_type", "origin", "ws4pp", "i4pp", "rs4rs", "mp4rs", "snr4pp","npt",
+    "lod", "loq", "nups4pp", "ndowns4pp", "ws4pa", "lp4e", "rp4e", "mp4e", "bline","bline4pa", "rmode", "rmis", "rmratio")
+  val intHeaders = List("ws4pp", "i4pp", "mp4rs", "snr4pp","npt", "nups4pp", "ndowns4pp", "lp4e", "rp4e", "mp4e",
     "function")
   val fileInfo = "物质信息配置文件"
 
@@ -117,6 +117,7 @@ class CompoundFileValidTool(lines: List[List[String]]) {
       "polynomial_type" -> List("linear", "quadratic"),
       "origin" -> List("exclude", "include"),
       "bline" -> List("yes", "no"),
+      "bline4pa" -> List("yes", "no"),
       "rmode" -> List("yes", "no"))
 
     val columns = factorMap.keySet

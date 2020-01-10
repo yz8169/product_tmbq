@@ -2,6 +2,7 @@ package utils
 
 import java.io.{File, FileInputStream, FileOutputStream}
 import java.lang.reflect.Field
+import java.nio.charset.Charset
 import java.text.SimpleDateFormat
 
 import org.apache.commons.io.{FileUtils, IOUtils}
@@ -16,6 +17,7 @@ import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
 import scala.jdk.CollectionConverters._
 import implicits.Implicits._
+import org.zeroturnaround.zip.ZipUtil
 
 //import scala.math.log10
 
@@ -35,6 +37,15 @@ object Utils {
   def createDirectoryWhenNoExist(file: File): Unit = {
     if (!file.exists && !file.isDirectory) FileUtils.forceMkdir(file)
 
+  }
+
+  def unpack(file: File, dir: File) = {
+    try {
+      ZipUtil.unpack(file, dir)
+    } catch {
+      case e: Exception =>
+        ZipUtil.unpack(file, dir, Charset.forName("GBK"))
+    }
   }
 
   def getPrefix(file: File): String = {

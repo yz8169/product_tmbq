@@ -34,6 +34,7 @@ class MissionExecActor @Inject()(mission: MissionRow)(implicit val system: Actor
 ) extends Actor {
   val missionDao = dao.missionDao
   implicit val configDao = dao.configDao
+
   import MissionTool._
 
   override def receive: Receive = {

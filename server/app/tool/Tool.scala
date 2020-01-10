@@ -341,7 +341,7 @@ object Tool {
     val compoundConfigFile = WebTool.fileMoveDir("compoundConfigFile", dataDir)
     compoundConfigFile.removeEmptyLine
     val tmpDataDir = new File(dataDir, "tmpData").reCreateDirectoryWhenExist
-    ZipUtil.unpack(dataFile, tmpDataDir)
+    Utils.unpack(dataFile, tmpDataDir)
     MyDataDir(dataDir, tmpDataDir, dataFile, sampleConfigFile, compoundConfigFile)
   }
 

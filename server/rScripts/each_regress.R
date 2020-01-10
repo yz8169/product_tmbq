@@ -411,7 +411,12 @@ infoData <- rbind(infoData, calculateData)
 
 regressData <- rbind(infoData, mic)
 
-colorData <- rbind(infoData, color)
+colorData <- rbind(infoData, color) %>%
+  as_tibble() %>%
+  filter(!sample %in% c("index", "mz", "rtLeft", "rtRight", "peakMethod", "response", "is", "regressMethod", "origin",
+                        "fl", "iteration", "snr", "lod", "loq", "nups", "ndowns", "dfl", "lp", "rp", "mpfs", "bline",
+                        "rmode", "rmis", "rmrate", "rSquare", "fc", "compound", "std", "minPoint", "r-square", "formula",
+                        "RSD(%)", "mean", "SD", "npt", "bline4pa"))
 
 write.table(colorData, opt$coi, quote = FALSE, sep = "\t", row.names = F)
 
@@ -419,7 +424,7 @@ regressData <- regressData %>%
   filter(!sample %in% c("index", "mz", "rtLeft", "rtRight", "peakMethod", "response", "is", "regressMethod", "origin",
                         "fl", "iteration", "snr", "lod", "loq", "nups", "ndowns", "dfl", "lp", "rp", "mpfs", "bline",
                         "rmode", "rmis", "rmrate", "rSquare", "fc", "compound", "std", "minPoint", "r-square", "formula",
-                        "RSD(%)", "mean", "SD"))
+                        "RSD(%)", "mean", "SD", "npt", "bline4pa"))
 
 regressData
 

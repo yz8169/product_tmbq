@@ -1,16 +1,16 @@
 #!/usr/bin/python
 # -*- coding: UTF-8 -*-
+from tkinter.ttk import *
+from tkinter import filedialog
+from tkinter import *
 from scipy.signal import savgol_filter
 import pandas as pd
 import numpy as np
 import threading
+import matplotlib.pyplot as plt
 
 size = "550x450"
 
-import sys
-
-reload(sys)
-sys.setdefaultencoding('utf8')
 
 def average_intensity(time_list, intensity_list, time_left, time_right):
     assert len(time_list) == len(intensity_list)
@@ -403,14 +403,80 @@ class ModifyCsv(object):
         workbook.close()
 
 
-import argparse
+class GUI(object):
+    def __init__(self):
+        self.root = Tk()
+        self.root.title("Rentention time adjust")
+        self.root.geometry(size)
+        notebook = Notebook(self.root)
+        frame1 = Frame(notebook)
+        self.root.rowconfigure(1, weight=1)
+        self.root.rowconfigure(2, weight=8)
+        var_save = StringVar()
+        var_comp = StringVar()
+        self.entry1 = Entry(frame1, textvariable=var_comp, width=50, font=40)
+        self.entry1.place(x=90, y=60)
+        self.entry2 = Entry(frame1, textvariable=var_save, width=50, font=40)
+        self.entry2.place(x=90, y=120)
+        button_save = Button(frame1, text="Save", command=self.save)
+        button_save.place(x=10, y=120)
+        button_save = Button(frame1, text="comp", command=self.select)
+        button_save.place(x=10, y=60)
+        Button(frame1, text="Add", command=self.add_msfile).place(x=40, y=350)
+        Button(frame1, text="Remove", command=self.delete).place(x=235, y=350)
+        Button(frame1, text="start", command=self.thread).place(x=430, y=350)
+        r = StringVar()
+        self.listbox_filename = Listbox(frame1, listvariable=r, selectmode=EXTENDED, width=70, height=5)
+        self.listbox_filename.place(x=10, y=180)
+        bar = Scrollbar(self.root)
+        bar.pack(side=RIGHT, fill=Y)
+        self.listbox_filename['yscrollcommand'] = bar.set
+        bar['command'] = self.listbox_filename.yview
+        notebook.add(frame1, text="Retention time")
+        notebook.pack(expand=1, fill="both")
+        self.root.resizable(0, 0)
+        self.root.mainloop()
+
+    def save(self):
+        self.entry2.delete(0, END)
+        a = filedialog.asksaveasfilename(title="save files", filetypes=[("XLSX", ".xlsx")])
+        self.entry2.insert(0, a + '.xlsx')
+
+    def select(self):
+        self.entry1.delete(0, END)
+        a = filedialog.askopenfilename(title="select compound_list", filetypes=[("XLSX", ".xlsx"), ("CSV", ".csv")])
+        self.entry1.insert(0, a)
+
+    def add_msfile(self):
+        txt = filedialog.askopenfilenames(filetypes=[(".TXT", ".txt")])
+        for i in txt:
+            if i not in self.listbox_filename.get(0, END):
+                self.listbox_filename.insert(END, i)
+
+    def delete(self):
+        x = self.listbox_filename.curselection()
+        for i in x:
+            y = x.index(i)
+            z = int(i) - y
+            self.listbox_filename.delete(z)
+
+    def start(self):
+        import time
+        time1 = time.time()
+        print('Start at:%s' % time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
+        A = ModifyCsv(compound_list=self.entry1.get(), ms_file1=self.listbox_filename.get(0, END)[0],
+                      ms_file2=self.listbox_filename.get(0, END)[1], output=self.entry2.get())
+        A.modify_test()
+        time2 = time.time()
+        spent_time = int(time2 - time1)
+        print('Finish at:%s' % time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
+        print('Used time: %ds' % spent_time)
+
+    def thread(self):
+        job = threading.Thread(target=self.start)
+        job.setDaemon(True)
+        job.start()
+
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--std7", type=str, default="", help="std 7 file")
-    parser.add_argument("--std8", type=str, default="", help="std 8 file")
-    parser.add_argument("--compound", type=str, default="", help="compound config execl file")
-    parser.add_argument("--o", type=str, default="", help="output file")
-    args = parser.parse_args()
-    a = ModifyCsv(ms_file1=args.std7, ms_file2=args.std8, compound_list=args.compound, output=args.o)
-    a.modify_test()
+    GUI()
